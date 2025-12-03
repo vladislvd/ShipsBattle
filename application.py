@@ -16,6 +16,8 @@ class Application(pyglet.window.Window):
             'game': scenes.GameScene(self.width, self.height, self)
         }
         self.current_scene = 'menu'
+        self.keys = pyglet.window.key.KeyStateHandler()
+        self.push_handlers(self.keys)
 
     def on_draw(self):
         self.clear()

@@ -40,7 +40,7 @@ class MenuScene:
             self.application.close()
 
     def on_key_press(self):
-        if self.keys[pyglet.window.key._1]:
+        if self.application.keys[pyglet.window.key._2]:
             self.application.switch_scene('game')
 
     def update(self, dt):
