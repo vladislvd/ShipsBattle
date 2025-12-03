@@ -1,20 +1,19 @@
 import pyglet
-from config.settings import WINDOW_WIDTH, WINDOW_HEIGHT
-from scenes.menu import MenuScene
-from scenes.game import GameScene
+import config
+import scenes
 
 
 class Application(pyglet.window.Window):
     def __init__(self):
         super().__init__(
-            width=WINDOW_WIDTH,
-            height=WINDOW_HEIGHT,
+            width=config.WINDOW_WIDTH,
+            height=config.WINDOW_HEIGHT,
             caption="ShipsBattle"
         )
         pyglet.clock.schedule_interval(self.update, 1/60)
         self.scenes = {
-            'menu': MenuScene,
-            'game': GameScene
+            'menu': scenes.MenuScene,
+            'game': scenes.GameScene
         }
 
     def update(self, dt):
