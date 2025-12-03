@@ -2,5 +2,3 @@
 venv/
 .idea/
 __pycache__/
-config/__pycache__
-scenes/__pycache__
