@@ -1,2 +1,2 @@
-from game import GameScene
-from menu import MenuScene
+from scenes.game import GameScene
+from scenes.menu import MenuScene

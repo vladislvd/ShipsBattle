@@ -1,11 +1,12 @@
 import pyglet
+import logic
 
 
 class GameScene:
     def __init__(self, window_width, window_height, application):
         self.application = application
         self.batch = pyglet.graphics.Batch()
-
+        self.player_field = logic.PlayerField()
 
     def draw(self):
         pass

@@ -1,5 +1,4 @@
 import pyglet
-import objects
 import widgets
 from pyglet.gl import glClearColor
 

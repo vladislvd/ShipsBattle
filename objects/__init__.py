@@ -1,1 +1,0 @@
-from objects.base import BaseObject
