@@ -12,9 +12,22 @@ class Application(pyglet.window.Window):
         )
         pyglet.clock.schedule_interval(self.update, 1/60)
         self.scenes = {
-            'menu': scenes.MenuScene,
-            'game': scenes.GameScene
+            'menu': scenes.MenuScene(self.width, self.height, self),
+            'game': scenes.GameScene(self.width, self.height, self)
         }
+        self.current_scene = 'menu'
+        self.keys = pyglet.window.key.KeyStateHandler()
+        self.push_handlers(self.keys)
+
+    def on_draw(self):
+        self.clear()
+        self.scenes[self.current_scene].draw()
+
+    def switch_scene(self, next_scene):
+        self.current_scene = next_scene
+
+    def on_mouse_press(self, x, y,  button, modifiers):
+        self.scenes[self.current_scene].on_mouse_press(x, y, button, modifiers)
 
     def update(self, dt):
-        pass
+        self.scenes[self.current_scene].update(dt)
