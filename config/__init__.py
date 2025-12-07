@@ -1,2 +1,3 @@
-from config.settings import WINDOW_WIDTH, WINDOW_HEIGHT, CELL_SIZE, BORDER_SIZE, FIELD_SIZE
-from config.colors import WATER, WHITE, AIR
+from config.settings import WINDOW_WIDTH, WINDOW_HEIGHT, CELL_SIZE, BORDER_SIZE, FIELD_SIZE, WIDTH_IN_CELLS, \
+    HEIGHT_IN_CELLS
+from config.colors import WATER, WHITE, AIR, SHIP, RED_DOT

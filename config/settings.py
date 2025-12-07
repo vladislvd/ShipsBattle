@@ -1,6 +1,7 @@
 # Размеры окна
 WINDOW_WIDTH = 1225
-WINDOW_HEIGHT = 800
+WINDOW_HEIGHT = 805
+
 
 # Размеры клетки
 CELL_SIZE = 35
@@ -8,3 +9,7 @@ BORDER_SIZE = 5
 
 # Размеры поля
 FIELD_SIZE = (CELL_SIZE + BORDER_SIZE) * 9 + CELL_SIZE
+
+# Размеры окна в клетках
+WIDTH_IN_CELLS = WINDOW_WIDTH//CELL_SIZE
+HEIGHT_IN_CELLS = WINDOW_HEIGHT//CELL_SIZE

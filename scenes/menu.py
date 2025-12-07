@@ -32,7 +32,7 @@ class MenuScene:
         glClearColor(0, 0, 0, 1.0)
         self.batch.draw()
 
-    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
+    def on_mouse_press(self, x, y):
         if self.start_button.on_click(x, y):
             self.application.switch_scene('game')
         if self.close_button.on_click(x, y):

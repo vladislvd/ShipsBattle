@@ -3,7 +3,7 @@ import config.settings as config
 
 
 class FieldDrawer:
-    def __init__(self, window_width, window_height, batch, field_data, x_loc):
+    def __init__(self, window_width, window_height, batch,  field_data, x_loc):
         self.field = []
         self.window_width = window_width
         self.window_height = window_height
