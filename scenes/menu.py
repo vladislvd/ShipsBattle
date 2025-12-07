@@ -29,7 +29,7 @@ class MenuScene:
         self.application.push_handlers(self.keys)
 
     def draw(self):
-        glClearColor(0, 0, 0, 1.0)
+        glClearColor(0.12, 0.20, 0.22, 1.0)
         self.batch.draw()
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
