@@ -54,16 +54,20 @@ class GameScene:
             pass
 
     def mouse_press_pl(self, x, y):
-        x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - 3
-        y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - 5
+        y_cells_to_field = int(self.draw_player_field.field[0][0].y//config.CELL_SIZE)
+        x_cells_to_field = int(self.draw_player_field.field[0][0].x // config.CELL_SIZE)
+        x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
+        y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
         if self.draw_player_field.field[y_on_field][x_on_field].on_click(x, y):
             self.draw_player_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
                                                                                 y_on_field,
                                                                                 self.draw_player_field.field)
 
     def mouse_press_ai(self, x, y):
-        x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - 18
-        y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - 5
+        y_cells_to_field = int(self.draw_AI_field.field[0][0].y // config.CELL_SIZE)
+        x_cells_to_field = int(self.draw_AI_field.field[0][0].x // config.CELL_SIZE) - 2
+        x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
+        y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
         if self.draw_AI_field.field[y_on_field][x_on_field].on_click(x, y):
             self.draw_AI_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
                                                                             y_on_field,
