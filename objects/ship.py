@@ -20,5 +20,10 @@ class ShipsDrawer:
                     )
                     ship.append(deck)
                 self.ships.append(ship)
-                x_for_ships_in_row = self.ships[-1][-1].x + config.CELL_SIZE + config.BORDER_SIZE*4
-            self.start_y -= config.CELL_SIZE + config.BORDER_SIZE*4
+                if long == 1:
+                    x_for_ships_in_row = self.ships[-1][-1].x + 3*(config.CELL_SIZE + config.BORDER_SIZE)
+                if long == 2:
+                    x_for_ships_in_row = self.ships[-1][-1].x + 2*(config.CELL_SIZE + config.BORDER_SIZE)
+                if long == 3:
+                    x_for_ships_in_row = self.ships[-1][-1].x + 4*(config.CELL_SIZE + config.BORDER_SIZE)
+            self.start_y -= config.CELL_SIZE + config.BORDER_SIZE

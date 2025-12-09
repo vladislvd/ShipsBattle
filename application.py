@@ -27,7 +27,13 @@ class Application(pyglet.window.Window):
         self.current_scene = next_scene
 
     def on_mouse_press(self, x, y,  button, modifiers):
-        self.scenes[self.current_scene].on_mouse_press(x, y)
+        self.scenes[self.current_scene].on_mouse_press(x, y, button)
+
+    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        self.scenes[self.current_scene].on_mouse_drag(x, y, buttons)
+
+    def on_mouse_release(self, x, y, button, modifiers):
+        self.scenes[self.current_scene].on_mouse_release(x, y, button)
 
     def update(self, dt):
         self.scenes[self.current_scene].update(dt)
