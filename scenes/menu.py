@@ -32,17 +32,11 @@ class MenuScene:
         glClearColor(0.12, 0.20, 0.22, 1.0)
         self.batch.draw()
 
-    def on_mouse_press(self, x, y, button):
+    def on_mouse_press(self, x, y):
         if self.start_button.on_click(x, y):
             self.application.switch_scene('game')
         if self.close_button.on_click(x, y):
             self.application.close()
-
-    def on_mouse_drag(self, x, y, buttons):
-        pass
-
-    def on_mouse_release(self, x, y, button):
-        pass
 
     def on_key_press(self):
         if self.application.keys[pyglet.window.key._2]:

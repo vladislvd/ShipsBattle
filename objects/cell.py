@@ -28,10 +28,6 @@ class Cell(pyglet.shapes.Rectangle):
             batch=self.batch
         )
         self.check_types()
-        self.is_dragging = False
-        self.offset_x = 0
-        self.offset_y = 0
-        self.enable = True
         # 0 - вода
         # 1 - корабль
         # 2 - мимо
@@ -59,11 +55,7 @@ class Cell(pyglet.shapes.Rectangle):
             self.cross.line1.visible = True
             self.cross.line2.visible = True
 
-    def set_ship(self, x_on_field, y_on_field, field):
-        field[y_on_field][x_on_field].type = 1
-        field[y_on_field][x_on_field].check_types()
-
-    def mouse_on(self, x, y):
+    def on_click(self, x, y):
         return self.x <= x <= self.x + self.width and self.y <= y <= self.y + self.height
 
     def on_mouse_click(self, x_on_field, y_on_field, field):

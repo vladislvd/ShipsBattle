@@ -14,7 +14,7 @@ class FieldDrawer:
             for col in range(len(field_data[row])):
                 cell = Cell(
                     x=col * (config.CELL_SIZE+config.BORDER_SIZE) + x_loc,
-                    y=row * (config.CELL_SIZE+config.BORDER_SIZE) + self.window_height//2 - config.FIELD_SIZE//4,
+                    y=row * (config.CELL_SIZE+config.BORDER_SIZE) + self.window_height//2 - config.FIELD_SIZE//2,
                     type=int(field_data[row][col]),
                     batch=self.batch
                 )
