@@ -13,6 +13,7 @@ class GameScene:
         self.batch = pyglet.graphics.Batch()
         self.player_field = logic.PlayerField()
         self.AI_field = logic.AIField()
+        self.turn = 'Player'
         self.draw_player_field = objects.FieldDrawer(window_width=self.window_width,
                                                      window_height=self.window_height,
                                                      batch=self.batch,
@@ -25,6 +26,19 @@ class GameScene:
                                                  field_data=self.AI_field.field,
                                                  x_loc=window_width//2 + 100
                                                  )
+        self.player_ship = objects.ShipsDrawer(
+            batch=self.batch,
+            start_x=self.draw_player_field.field[0][0].x,
+            start_y=self.draw_player_field.field[0][0].y - (config.CELL_SIZE + config.BORDER_SIZE*4),
+            max_long=4
+        )
+
+        self.AI_ship = objects.ShipsDrawer(
+            batch=self.batch,
+            start_x=self.draw_AI_field.field[0][0].x,
+            start_y=self.draw_AI_field.field[0][0].y - (config.CELL_SIZE + config.BORDER_SIZE * 4),
+            max_long=4
+        )
 
     def draw(self):
         glClearColor(0.12, 0.20, 0.22, 1.0)
@@ -58,6 +72,9 @@ class GameScene:
     def on_key_press(self):
         if self.application.keys[pyglet.window.key._1]:
             self.application.switch_scene('menu')
+
+    def process_logic(self):
+        pass
 
     def update(self, dt):
         self.on_key_press()
