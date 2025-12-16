@@ -32,12 +32,15 @@ class GameScene:
             start_y=self.draw_player_field.field[0][0].y - (config.CELL_SIZE + config.BORDER_SIZE*4),
             max_long=4
         )
-
-        self.AI_ship = objects.ShipsDrawer(
+        self.AI_ships = objects.ShipsDrawer(
             batch=self.batch,
             start_x=self.draw_AI_field.field[0][0].x,
             start_y=self.draw_AI_field.field[0][0].y - (config.CELL_SIZE + config.BORDER_SIZE * 4),
             max_long=4
+        )
+        self.AI_ships_on_field = logic.PuttingAIShips(
+            field=self.draw_AI_field.field,
+            ships=self.AI_ships.ships
         )
 
     def draw(self):
