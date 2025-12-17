@@ -40,7 +40,8 @@ class GameScene:
         )
         self.AI_ships_on_field = logic.PuttingAIShips(
             field=self.draw_AI_field.field,
-            ships=self.AI_ships.ships
+            ships=self.AI_ships.ships,
+            filedDrawer=self.draw_AI_field
         )
 
     def draw(self):

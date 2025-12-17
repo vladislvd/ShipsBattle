@@ -3,9 +3,11 @@ from itertools import product
 
 
 class PuttingAIShips:
-    def __init__(self, field, ships):
+    def __init__(self, field, ships, filedDrawer):
         self.field = field
         self.ships = ships
+        self.filedDrawer = filedDrawer
+        self.max_attempts = 100
         self.put_ai_ships()
 
     def check_around(self, decks, x_on_field, y_on_field, rotate):
@@ -36,34 +38,41 @@ class PuttingAIShips:
             y_on_field = random.randint(0, col_len-1)
             attempt = 0
             while not self.check_around(decks, x_on_field, y_on_field, rotate):
-                x_on_field = random.randint(0, max_x)
-                y_on_field = random.randint(0, col_len - 1)
-                self.check_around(decks, x_on_field, y_on_field, rotate)
                 attempt += 1
-                print(attempt)
-            return x_on_field, y_on_field, rotate, attempt
+                if attempt <= self.max_attempts:
+                    x_on_field = random.randint(0, max_x)
+                    y_on_field = random.randint(0, col_len - 1)
+                    self.check_around(decks, x_on_field, y_on_field, rotate)
+                else:
+                    return 0
+            return x_on_field, y_on_field, rotate
         if rotate == 'y':
             max_y = col_len - decks
             x_on_field = random.randint(0, row_len-1)
             y_on_field = random.randint(0, max_y)
             attempt = 0
             while not self.check_around(decks, x_on_field, y_on_field, rotate):
-                x_on_field = random.randint(0, row_len - 1)
-                y_on_field = random.randint(0, max_y)
-                self.check_around(decks, x_on_field, y_on_field, rotate)
-                attempt+=1
-                print(attempt)
-            return x_on_field, y_on_field, rotate, attempt
+                attempt += 1
+                if attempt <= self.max_attempts:
+                    x_on_field = random.randint(0, row_len - 1)
+                    y_on_field = random.randint(0, max_y)
+                    self.check_around(decks, x_on_field, y_on_field, rotate)
+                else:
+                    return 0
+            return x_on_field, y_on_field, rotate
 
     def put_ai_ships(self):
-        all_attempts = 0
         for ship in range(len(self.ships)):
-            x_on_field, y_on_field, rotate, attempt = self.get_x_y(ship)
-            all_attempts+=attempt
-            decks = len(self.ships[ship])
-            for i in range(decks):
-                if rotate == 'x':
-                    self.field[y_on_field][x_on_field+i].set_type(1)
-                if rotate == 'y':
-                    self.field[y_on_field+i][x_on_field].set_type(1)
-            print(all_attempts)
+            result = self.get_x_y(ship)
+            if result == 0:
+                self.filedDrawer.clear_field()
+                self.put_ai_ships()
+                print('стоп')
+            else:
+                x_on_field, y_on_field, rotate = result
+                decks = len(self.ships[ship])
+                for i in range(decks):
+                    if rotate == 'x':
+                        self.field[y_on_field][x_on_field+i].set_type(1)
+                    if rotate == 'y':
+                        self.field[y_on_field+i][x_on_field].set_type(1)

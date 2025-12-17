@@ -20,3 +20,8 @@ class FieldDrawer:
                 )
                 field_row.append(cell)
             self.field.append(field_row)
+
+    def clear_field(self):
+        for row in range(len(self.field)):
+            for col in range(len(self.field[row])):
+                self.field[row][col].set_type(0)
