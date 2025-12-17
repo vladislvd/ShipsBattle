@@ -71,8 +71,12 @@ class PuttingAIShips:
             else:
                 x_on_field, y_on_field, rotate = result
                 decks = len(self.ships[ship])
+                ai_ship = []
                 for i in range(decks):
                     if rotate == 'x':
                         self.field[y_on_field][x_on_field+i].set_type(1)
+                        ai_ship.append(self.field[y_on_field][x_on_field+i])
                     if rotate == 'y':
                         self.field[y_on_field+i][x_on_field].set_type(1)
+                        ai_ship.append(self.field[y_on_field+i][x_on_field])
+                self.ships[ship] = ai_ship
