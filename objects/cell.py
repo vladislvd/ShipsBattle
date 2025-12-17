@@ -13,6 +13,9 @@ class Cell(pyglet.shapes.Rectangle):
             batch=batch
         )
         self.type = type
+        self.rotate = ''
+        self.x_on_field = 0
+        self.y_on_field = 0
         self.dot = pyglet.shapes.Circle(
             x=self.x + self.width//2,
             y=self.y + self.height//2,

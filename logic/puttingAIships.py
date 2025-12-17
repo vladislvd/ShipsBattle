@@ -1,4 +1,5 @@
 import random
+import config
 from itertools import product
 
 
@@ -76,7 +77,23 @@ class PuttingAIShips:
                     if rotate == 'x':
                         self.field[y_on_field][x_on_field+i].set_type(1)
                         ai_ship.append(self.field[y_on_field][x_on_field+i])
+                        self.field[y_on_field][x_on_field + i].x_on_field = x_on_field + i
+                        self.field[y_on_field][x_on_field + i].y_on_field = y_on_field
+                        self.field[y_on_field][x_on_field + i].rotate = rotate
                     if rotate == 'y':
                         self.field[y_on_field+i][x_on_field].set_type(1)
                         ai_ship.append(self.field[y_on_field+i][x_on_field])
+                        self.field[y_on_field+i][x_on_field].x_on_field = x_on_field
+                        self.field[y_on_field+i][x_on_field].y_on_field = y_on_field + i
+                        self.field[y_on_field+i][x_on_field].rotate = rotate
                 self.ships[ship] = ai_ship
+
+    def tick_cells_around_ship(self, ship, field):
+        for deck in range(len(ship)):
+            for x, y in product([-1, 0, 1], repeat=2):
+                x_on_field = ship[deck].x_on_field
+                y_on_field = ship[deck].y_on_field
+                if 0 <= y_on_field + y < len(field) and 0 <= x_on_field + x < len(field[0]):
+                    if field[y_on_field + y][x_on_field + x].type != 3:
+                        field[y_on_field + y][x_on_field + x].set_type(2)
+

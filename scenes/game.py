@@ -69,9 +69,22 @@ class GameScene:
         x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - 18
         y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - 5
         if self.draw_AI_field.field[y_on_field][x_on_field].on_click(x, y):
-            self.draw_AI_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
-                                                                            y_on_field,
-                                                                            self.draw_AI_field.field)
+            if self.draw_AI_field.field[y_on_field][x_on_field].type == 1:
+                self.draw_AI_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
+                                                                                y_on_field,
+                                                                                self.draw_AI_field.field)
+                ship_in_ai_ships = 0
+                for ship in range(len(self.AI_ships.ships)):
+                    for deck in range(len(self.AI_ships.ships[ship])):
+                        if self.AI_ships.ships[ship][deck] == self.draw_AI_field.field[y_on_field][x_on_field]:
+                            ship_in_ai_ships = ship
+                if self.AI_ships.is_kill(self.AI_ships.ships[ship_in_ai_ships]):
+                    self.AI_ships_on_field.tick_cells_around_ship(ship=self.AI_ships.ships[ship_in_ai_ships],
+                                                                  field=self.draw_AI_field.field)
+            else:
+                self.draw_AI_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
+                                                                                y_on_field,
+                                                                                self.draw_AI_field.field)
 
     def on_key_press(self):
         if self.application.keys[pyglet.window.key._1]:
