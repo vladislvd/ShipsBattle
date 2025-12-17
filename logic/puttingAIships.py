@@ -67,7 +67,6 @@ class PuttingAIShips:
             if result == 0:
                 self.filedDrawer.clear_field()
                 self.put_ai_ships()
-                print('стоп')
             else:
                 x_on_field, y_on_field, rotate = result
                 decks = len(self.ships[ship])
