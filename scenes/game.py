@@ -28,18 +28,22 @@ class GameScene:
                                                  field_data=self.AI_field.field,
                                                  x_loc=window_width//2 + 100
                                                  )
-        self.player_ships = objects.ShipsDrawer(
+        self.player_ship = objects.ShipsDrawer(
             batch=self.batch,
             start_x=self.draw_player_field.field[0][0].x,
-            start_y=self.draw_player_field.field[0][0].y - (config.CELL_SIZE + config.BORDER_SIZE*10),
+            start_y=self.draw_player_field.field[0][0].y - (config.CELL_SIZE + config.BORDER_SIZE*4),
             max_long=4
         )
-
         self.AI_ships = objects.ShipsDrawer(
             batch=self.batch,
             start_x=self.draw_AI_field.field[0][0].x,
-            start_y=self.draw_AI_field.field[0][0].y - (config.CELL_SIZE + config.BORDER_SIZE * 10),
+            start_y=self.draw_AI_field.field[0][0].y - (config.CELL_SIZE + config.BORDER_SIZE * 4),
             max_long=4
+        )
+        self.AI_ships_on_field = logic.PuttingAIShips(
+            field=self.draw_AI_field.field,
+            ships=self.AI_ships.ships,
+            filedDrawer=self.draw_AI_field
         )
 
     def draw(self):
