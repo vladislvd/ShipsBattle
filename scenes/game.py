@@ -1,3 +1,5 @@
+import random
+
 import pyglet
 import config
 import logic
@@ -51,6 +53,7 @@ class GameScene:
             ships=self.AI_ships.ships,
             filedDrawer=self.draw_AI_field
         )
+        self.AI_game = logic.AIgame(self.turn)
 
     def draw(self):
         glClearColor(0.12, 0.20, 0.22, 1.0)
@@ -58,13 +61,13 @@ class GameScene:
 
     def on_mouse_press(self, x, y, button):
         try:
-            if x < self.window_width//2 and self.is_game:
-                self.mouse_press_pl(x, y)
-            elif x > self.window_width//2 and self.is_game:
+            # if x < self.window_width//2 and self.is_game:
+            #     self.mouse_press_pl(x, y)
+            if x > self.window_width//2 and self.is_game:
                 self.mouse_press_ai(x, y)
         except:
             pass
-        if button == pyglet.window.mouse.LEFT and not self.is_game:
+        if button == pyglet.window.mouse.LEFT:
             ship = self.player_ships.ships[0][0]
             if ship.mouse_on(x, y) and ship.enable:
                 ship.is_dragging = True
@@ -73,12 +76,12 @@ class GameScene:
                 self.dragged_object = ship
 
     def on_mouse_drag(self, x, y, buttons):
-        if buttons == pyglet.window.mouse.LEFT and self.dragged_object is not None and not self.is_game:
+        if buttons == pyglet.window.mouse.LEFT and self.dragged_object is not None:
             self.dragged_object.x = x - self.dragged_object.offset_x
             self.dragged_object.y = y - self.dragged_object.offset_y
 
     def on_mouse_release(self, x, y, button):
-        if button == pyglet.window.mouse.LEFT and self.dragged_object is not None and not self.is_game:
+        if button == pyglet.window.mouse.LEFT and self.dragged_object is not None:
             self.dragged_object.is_dragged = False
             y_cells_to_field = int(self.draw_player_field.field[0][0].y // config.CELL_SIZE)
             x_cells_to_field = int(self.draw_player_field.field[0][0].x // config.CELL_SIZE)
@@ -92,47 +95,55 @@ class GameScene:
                 self.dragged_object.visible = False
             self.dragged_object = None
 
-    def mouse_press_pl(self, x, y):
-        y_cells_to_field = int(self.draw_player_field.field[0][0].y//config.CELL_SIZE)
-        x_cells_to_field = int(self.draw_player_field.field[0][0].x // config.CELL_SIZE)
-        x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
-        y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
-        if self.draw_player_field.field[y_on_field][x_on_field].mouse_on(x, y):
-            self.draw_player_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
-                                                                                y_on_field,
-                                                                                self.draw_player_field.field)
+    # def mouse_press_pl(self, x, y):
+    #     y_cells_to_field = int(self.draw_player_field.field[0][0].y//config.CELL_SIZE)
+    #     x_cells_to_field = int(self.draw_player_field.field[0][0].x // config.CELL_SIZE)
+    #     x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
+    #     y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
+    #     if self.draw_player_field.field[y_on_field][x_on_field].mouse_on(x, y):
+    #         self.draw_player_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
+    #                                                                             y_on_field,
+    #                                                                             self.draw_player_field.field)
 
     def mouse_press_ai(self, x, y):
-        y_cells_to_field = int(self.draw_AI_field.field[0][0].y // config.CELL_SIZE)
-        x_cells_to_field = int(self.draw_AI_field.field[0][0].x // config.CELL_SIZE) - 2
-        x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
-        y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
-        if self.draw_AI_field.field[y_on_field][x_on_field].mouse_on(x, y):
-            self.draw_double_AI_field.field[y_on_field][x_on_field].delete()
-            if self.draw_AI_field.field[y_on_field][x_on_field].type == 1:
-                self.draw_AI_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
-                                                                                y_on_field,
-                                                                                self.draw_AI_field.field)
-                ship_in_ai_ships = 0
-                for ship in range(len(self.AI_ships.ships)):
-                    for deck in range(len(self.AI_ships.ships[ship])):
-                        if self.AI_ships.ships[ship][deck] == self.draw_AI_field.field[y_on_field][x_on_field]:
-                            ship_in_ai_ships = ship
-                if self.AI_ships.is_kill(self.AI_ships.ships[ship_in_ai_ships]):
-                    self.AI_ships_on_field.tick_cells_around_ship(ship=self.AI_ships.ships[ship_in_ai_ships],
-                                                                  field=self.draw_AI_field.field,
-                                                                  double_field=self.draw_double_AI_field.field)
-            else:
-                self.draw_AI_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
-                                                                                y_on_field,
-                                                                                self.draw_AI_field.field)
+        if self.is_game and self.turn == 'Player':
+            y_cells_to_field = int(self.draw_AI_field.field[0][0].y // config.CELL_SIZE)
+            x_cells_to_field = int(self.draw_AI_field.field[0][0].x // config.CELL_SIZE) - 2
+            x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
+            y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
+            if self.draw_AI_field.field[y_on_field][x_on_field].mouse_on(x, y) and \
+                    self.draw_AI_field.field[y_on_field][x_on_field].type != 2:
+                self.draw_double_AI_field.field[y_on_field][x_on_field].delete()
+                if self.draw_AI_field.field[y_on_field][x_on_field].type == 1:
+                    self.draw_AI_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
+                                                                                    y_on_field,
+                                                                                    self.draw_AI_field.field)
+                    ship_in_ai_ships = 0
+                    for ship in range(len(self.AI_ships.ships)):
+                        for deck in range(len(self.AI_ships.ships[ship])):
+                            if self.AI_ships.ships[ship][deck] == self.draw_AI_field.field[y_on_field][x_on_field]:
+                                ship_in_ai_ships = ship
+                    if self.AI_ships.is_kill(self.AI_ships.ships[ship_in_ai_ships]):
+                        self.AI_ships.tick_cells_around_ship(ship=self.AI_ships.ships[ship_in_ai_ships],
+                                                             field=self.draw_AI_field.field,
+                                                             double_field=self.draw_double_AI_field.field)
+                else:
+                    self.draw_AI_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
+                                                                                    y_on_field,
+                                                                                    self.draw_AI_field.field)
+                    self.turn = 'AI'
 
     def on_key_press(self):
         if self.application.keys[pyglet.window.key._1]:
             self.application.switch_scene('menu')
 
     def process_logic(self):
-        pass
+        if self.is_game and self.turn == 'AI':
+            x_on_field = random.randint(0, 9)
+            y_on_field = random.randint(0, 9)
+            self.AI_game.take_move(self.draw_player_field.field, x_on_field, y_on_field)
+            self.turn = 'Player'
 
     def update(self, dt):
+        self.process_logic()
         self.on_key_press()
