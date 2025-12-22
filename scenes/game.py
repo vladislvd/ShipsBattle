@@ -1,5 +1,3 @@
-import random
-
 import pyglet
 import config
 import logic
@@ -15,7 +13,7 @@ class GameScene:
         self.batch = pyglet.graphics.Batch()
         self.player_field = logic.PlayerField()
         self.AI_field = logic.AIField()
-        self.turn = 'Player'
+        self.turn = 'AI'
         self.dragged_object = None
         self.is_game = True
         self.draw_player_field = objects.FieldDrawer(window_width=self.window_width,
@@ -32,7 +30,7 @@ class GameScene:
                                                  )
         self.draw_double_AI_field = objects.FieldDrawer(window_width=self.window_width,
                                                         window_height=self.window_height,
-                                                        batch=self.batch,
+                                                        batch=None,
                                                         field_data=self.AI_field.field,
                                                         x_loc=window_width // 2 + 100
                                                         )
@@ -53,7 +51,22 @@ class GameScene:
             ships=self.AI_ships.ships,
             filedDrawer=self.draw_AI_field
         )
-        self.AI_game = logic.AIgame(self.turn)
+        self.AI_game = logic.AIgame(turn=self.turn,
+                                    ships=self.player_ships.ships,
+                                    shipsDrawer=self.player_ships
+                                    )
+
+        """
+        ДЛЯ ТЕСТОВ. УДАЛИТЬ!!
+        """
+        self.player_ships_on_field = logic.PuttingAIShips(
+            field=self.draw_player_field.field,
+            ships=self.player_ships.ships,
+            filedDrawer=self.draw_player_field
+        )
+        """
+        ДЛЯ ТЕСТОВ. УДАЛИТЬ!!
+        """
 
     def draw(self):
         glClearColor(0.12, 0.20, 0.22, 1.0)
@@ -123,7 +136,7 @@ class GameScene:
                         for deck in range(len(self.AI_ships.ships[ship])):
                             if self.AI_ships.ships[ship][deck] == self.draw_AI_field.field[y_on_field][x_on_field]:
                                 ship_in_ai_ships = ship
-                    if self.AI_ships.is_kill(self.AI_ships.ships[ship_in_ai_ships]):
+                    if self.AI_ships.is_kill(self.AI_ships.ships[ship_in_ai_ships], "bool"):
                         self.AI_ships.tick_cells_around_ship(ship=self.AI_ships.ships[ship_in_ai_ships],
                                                              field=self.draw_AI_field.field,
                                                              double_field=self.draw_double_AI_field.field)
@@ -139,10 +152,9 @@ class GameScene:
 
     def process_logic(self):
         if self.is_game and self.turn == 'AI':
-            x_on_field = random.randint(0, 9)
-            y_on_field = random.randint(0, 9)
-            self.AI_game.take_move(self.draw_player_field.field, x_on_field, y_on_field)
-            self.turn = 'Player'
+            self.AI_game.take_move(field=self.draw_player_field.field,
+                                   ships=self.player_ships.ships)
+            # self.turn = 'Player'
 
     def update(self, dt):
         self.process_logic()

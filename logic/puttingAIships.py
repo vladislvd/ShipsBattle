@@ -8,7 +8,7 @@ class PuttingAIShips:
         self.ships = ships
         self.filedDrawer = filedDrawer
         self.max_attempts = 100
-        self.put_ai_ships()
+        self.put_ai_ships(ships)
 
     def check_around(self, decks, x_on_field, y_on_field, rotate):
         for cell in range(decks):
@@ -61,12 +61,12 @@ class PuttingAIShips:
                     return 0
             return x_on_field, y_on_field, rotate
 
-    def put_ai_ships(self):
+    def put_ai_ships(self, ships):
         for ship in range(len(self.ships)):
             result = self.get_x_y(ship)
             if result == 0:
                 self.filedDrawer.clear_field()
-                self.put_ai_ships()
+                self.put_ai_ships(ships)
             else:
                 x_on_field, y_on_field, rotate = result
                 decks = len(self.ships[ship])
@@ -85,3 +85,4 @@ class PuttingAIShips:
                         self.field[y_on_field+i][x_on_field].y_on_field = y_on_field + i
                         self.field[y_on_field+i][x_on_field].rotate = rotate
                 self.ships[ship] = ai_ship
+                ships[ship] = ai_ship

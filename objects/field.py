@@ -25,6 +25,3 @@ class FieldDrawer:
         for row in range(len(self.field)):
             for col in range(len(self.field[row])):
                 self.field[row][col].set_type(0)
-
-    def accept_attack(self):
-        pass
