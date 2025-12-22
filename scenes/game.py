@@ -55,31 +55,42 @@ class GameScene:
         except:
             pass
         if button == pyglet.window.mouse.LEFT:
-            ship = self.player_ships.ships[0][0]
-            if ship.mouse_on(x, y) and ship.enable:
-                ship.is_dragging = True
-                ship.offset_x = x - ship.x
-                ship.offset_y = y - ship.y
-                self.dragged_object = ship
+            for ship in self.player_ships.ships:
+                dragged = False
+                for deck in ship:
+                    if deck.mouse_on(x, y):
+                        dragged = True
+                        deck.offset_x = x - deck.x
+                        deck.offset_y = y - deck.y
+                if dragged:
+                    self.dragged_object = ship
 
     def on_mouse_drag(self, x, y, buttons):
-        if buttons == pyglet.window.mouse.LEFT and self.dragged_object is not None:
-            self.dragged_object.x = x - self.dragged_object.offset_x
-            self.dragged_object.y = y - self.dragged_object.offset_y
+        # if buttons == pyglet.window.mouse.LEFT and self.dragged_object is not None:
+        #     self.dragged_object.x = x - self.dragged_object.offset_x
+        #     self.dragged_object.y = y - self.dragged_object.offset_y
+        if self.dragged_object is not None:
+            i = x
+            for deck in self.dragged_object:
+                deck.x = i
+                deck.y = y
+                i += (config.CELL_SIZE + config.BORDER_SIZE)
 
     def on_mouse_release(self, x, y, button):
-        if button == pyglet.window.mouse.LEFT and self.dragged_object is not None:
-            self.dragged_object.is_dragged = False
+        if self.dragged_object is not None:
             y_cells_to_field = int(self.draw_player_field.field[0][0].y // config.CELL_SIZE)
             x_cells_to_field = int(self.draw_player_field.field[0][0].x // config.CELL_SIZE)
-            x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
-            y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
-            if self.draw_player_field.field[y_on_field][x_on_field].mouse_on(x, y):
-                self.draw_player_field.field[y_on_field][x_on_field].set_ship(x_on_field,
-                                                                              y_on_field,
-                                                                              self.draw_player_field.field)
-                self.dragged_object.enable = False
-                self.dragged_object.visible = False
+            deck = self.dragged_object[0]
+            x_on_field = int((x + config.CELL_SIZE // 2) // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
+            y_on_field = int((y + config.CELL_SIZE // 2) // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
+            field_start_x = self.draw_player_field.field[0][0].x
+            field_start_y = self.draw_player_field.field[0][0].y
+            i = 0
+            for deck in self.dragged_object:
+                deck.x = field_start_x + x_on_field * (config.CELL_SIZE + config.BORDER_SIZE) + \
+                         i * (config.CELL_SIZE + config.BORDER_SIZE)
+                deck.y = field_start_y + y_on_field * (config.CELL_SIZE + config.BORDER_SIZE)
+                i += 1
             self.dragged_object = None
 
 
