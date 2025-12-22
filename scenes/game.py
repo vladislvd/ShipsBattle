@@ -58,9 +58,7 @@ class GameScene:
 
     def on_mouse_press(self, x, y, button):
         try:
-            if x < self.window_width//2 and self.is_game:
-                self.mouse_press_pl(x, y)
-            elif x > self.window_width//2 and self.is_game:
+            if x > self.window_width//2 and self.is_game:
                 self.mouse_press_ai(x, y)
         except:
             pass
@@ -92,21 +90,11 @@ class GameScene:
                 self.dragged_object.visible = False
             self.dragged_object = None
 
-    def mouse_press_pl(self, x, y):
-        y_cells_to_field = int(self.draw_player_field.field[0][0].y//config.CELL_SIZE)
-        x_cells_to_field = int(self.draw_player_field.field[0][0].x // config.CELL_SIZE)
-        x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
-        y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
-        if self.draw_player_field.field[y_on_field][x_on_field].mouse_on(x, y):
-            self.draw_player_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
-                                                                                y_on_field,
-                                                                                self.draw_player_field.field)
-
     def mouse_press_ai(self, x, y):
         y_cells_to_field = int(self.draw_AI_field.field[0][0].y // config.CELL_SIZE)
         x_cells_to_field = int(self.draw_AI_field.field[0][0].x // config.CELL_SIZE) - 2
-        x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
-        y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
+        x_on_field = int((x + config.CELL_SIZE // 2) // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
+        y_on_field = int((y + config.CELL_SIZE // 2) // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
         if self.draw_AI_field.field[y_on_field][x_on_field].mouse_on(x, y):
             self.draw_double_AI_field.field[y_on_field][x_on_field].delete()
             self.draw_AI_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
