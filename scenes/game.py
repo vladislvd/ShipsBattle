@@ -1,4 +1,5 @@
 import pyglet
+import pyglet.clock
 import config
 import logic
 import objects
@@ -13,9 +14,10 @@ class GameScene:
         self.batch = pyglet.graphics.Batch()
         self.player_field = logic.PlayerField()
         self.AI_field = logic.AIField()
-        self.turn = 'AI'
+        self.turn = 'Player'
         self.dragged_object = None
         self.is_game = True
+        self.time_ai_sleep = 0.5
         self.draw_player_field = objects.FieldDrawer(window_width=self.window_width,
                                                      window_height=self.window_height,
                                                      batch=self.batch,
@@ -30,7 +32,7 @@ class GameScene:
                                                  )
         self.draw_double_AI_field = objects.FieldDrawer(window_width=self.window_width,
                                                         window_height=self.window_height,
-                                                        batch=None,
+                                                        batch=self.batch,
                                                         field_data=self.AI_field.field,
                                                         x_loc=window_width // 2 + 100
                                                         )
@@ -51,8 +53,7 @@ class GameScene:
             ships=self.AI_ships.ships,
             filedDrawer=self.draw_AI_field
         )
-        self.AI_game = logic.AIgame(turn=self.turn,
-                                    ships=self.player_ships.ships,
+        self.AI_game = logic.AIgame(ships=self.player_ships.ships,
                                     shipsDrawer=self.player_ships
                                     )
 
@@ -64,6 +65,16 @@ class GameScene:
             ships=self.player_ships.ships,
             filedDrawer=self.draw_player_field
         )
+        self.end_text = pyglet.text.Label(
+            text='',
+            color=(255, 0, 0),
+            x=window_width//2,
+            y=window_height//4,
+            font_size=100,
+            anchor_x='center',
+            anchor_y='center',
+            batch=self.batch
+        )
         """
         ДЛЯ ТЕСТОВ. УДАЛИТЬ!!
         """
@@ -74,8 +85,6 @@ class GameScene:
 
     def on_mouse_press(self, x, y, button):
         try:
-            # if x < self.window_width//2 and self.is_game:
-            #     self.mouse_press_pl(x, y)
             if x > self.window_width//2 and self.is_game:
                 self.mouse_press_ai(x, y)
         except:
@@ -108,16 +117,6 @@ class GameScene:
                 self.dragged_object.visible = False
             self.dragged_object = None
 
-    # def mouse_press_pl(self, x, y):
-    #     y_cells_to_field = int(self.draw_player_field.field[0][0].y//config.CELL_SIZE)
-    #     x_cells_to_field = int(self.draw_player_field.field[0][0].x // config.CELL_SIZE)
-    #     x_on_field = int(x // (config.CELL_SIZE + config.BORDER_SIZE)) - x_cells_to_field
-    #     y_on_field = int(y // (config.CELL_SIZE + config.BORDER_SIZE)) - y_cells_to_field
-    #     if self.draw_player_field.field[y_on_field][x_on_field].mouse_on(x, y):
-    #         self.draw_player_field.field[y_on_field][x_on_field].on_mouse_click(x_on_field,
-    #                                                                             y_on_field,
-    #                                                                             self.draw_player_field.field)
-
     def mouse_press_ai(self, x, y):
         if self.is_game and self.turn == 'Player':
             y_cells_to_field = int(self.draw_AI_field.field[0][0].y // config.CELL_SIZE)
@@ -145,17 +144,47 @@ class GameScene:
                                                                                     y_on_field,
                                                                                     self.draw_AI_field.field)
                     self.turn = 'AI'
+                self.is_pl_win()
+                pyglet.clock.schedule_once(self.process_logic, self.time_ai_sleep)
+
 
     def on_key_press(self):
         if self.application.keys[pyglet.window.key._1]:
             self.application.switch_scene('menu')
 
-    def process_logic(self):
+    def is_pl_win(self):
+        ai_killed_ships = 0
+        for ship in range(len(self.AI_ships.ships)):
+            if self.AI_ships.is_kill(self.AI_ships.ships[ship], "bool"):
+                ai_killed_ships += 1
+        if ai_killed_ships == len(self.AI_ships.ships):
+            self.end_text.text = "PLAYER WIN"
+            self.end()
+
+    def is_ai_win(self):
+        pl_killed_ships = 0
+        for ship in range(len(self.player_ships.ships)):
+            if self.AI_ships.is_kill(self.player_ships.ships[ship], "bool"):
+                pl_killed_ships += 1
+        if pl_killed_ships == len(self.player_ships.ships):
+            self.end_text.text = "AI WIN"
+            self.end()
+
+    def end(self):
+        self.is_game = False
+
+    def process_logic(self, dt):
         if self.is_game and self.turn == 'AI':
-            self.AI_game.take_move(field=self.draw_player_field.field,
-                                   ships=self.player_ships.ships)
-            # self.turn = 'Player'
+            if self.AI_game.take_move(field=self.draw_player_field.field,
+                                      ships=self.player_ships.ships,
+                                      game_scene=self
+                                      ):
+                self.turn = 'AI'
+                pyglet.clock.schedule_once(self.process_logic, self.time_ai_sleep)
+            else:
+                self.turn = 'Player'
+            self.is_ai_win()
 
     def update(self, dt):
-        self.process_logic()
+        # self.process_logic(dt)
         self.on_key_press()
