@@ -1,3 +1,5 @@
+from itertools import product
+
 import objects
 import config
 
@@ -28,12 +30,35 @@ class ShipsDrawer:
                     x_for_ships_in_row = self.ships[-1][-1].x + 4*(config.CELL_SIZE + config.BORDER_SIZE)
             self.start_y -= config.CELL_SIZE + config.BORDER_SIZE
 
-    def is_kill(self, ship):
+    def is_kill(self, ship, return_type):
         killed_decks = 0
         for deck in range(len(ship)):
             if ship[deck].type == 3:
                 killed_decks += 1
-        if killed_decks != len(ship):
-            return False
-        else:
-            return True
+        if return_type == "bool":
+            return killed_decks == len(ship)
+        elif return_type == "coord":
+            coordinates = []
+            for deck in range(len(ship)):
+                if ship[deck].type == 1:
+                    coordinates.append([ship[deck].x_on_field, ship[deck].y_on_field])
+            return coordinates
+        elif return_type == "killed_decks":
+            return killed_decks
+
+    def tick_cells_around_ship(self, ship, field, double_field=None):
+        for deck in range(len(ship)):
+            for x, y in product([-1, 0, 1], repeat=2):
+                x_on_field = ship[deck].x_on_field
+                y_on_field = ship[deck].y_on_field
+                if 0 <= y_on_field + y < len(field) and 0 <= x_on_field + x < len(field[0]):
+                    if field[y_on_field + y][x_on_field + x].type != 3:
+                        field[y_on_field + y][x_on_field + x].set_type(2)
+                        if double_field is not None:
+                            double_field[y_on_field + y][x_on_field + x].delete()
+
+    def find_ship(self, ships, field, x_on_field, y_on_field):
+        for ship in range(len(ships)):
+            for deck in range(len(ships[ship])):
+                if ships[ship][deck] == field[y_on_field][x_on_field]:
+                    return ships[ship]
