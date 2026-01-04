@@ -1,6 +1,5 @@
 from random import choice, randint
-
-from pyglet.gl.lib import t
+from pyglet.gl import base
 
 
 class AIgame:
@@ -10,52 +9,43 @@ class AIgame:
         self.target = None
         self.defeated_deck = None
         self.first_deck = True
-        #”ƒ¿À»“‹!!!
-        self.move = 0
-        #”ƒ¿À»“‹!!!
+        self.ships_len = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
+
+    def get_probability_map(self, field):
+        size = len(field)
+        weights = [[0 for _ in range(size)] for _ in range(size)]
+        for ship_len in self.ships_len:
+            for y in range(size):
+                for x in range(size):
+                    if ship_len + x <= size:
+                        if all(field[y][x + i].type < 2 for i in range(ship_len)):
+                            for i in range(ship_len):
+                                weights[y][x+i] += 1
+                    if ship_len + y <= size:
+                        if all(field[y+i][x].type < 2 for i in range(ship_len)):
+                            for i in range(ship_len):
+                                weights[y+i][x] += 1
+        return weights
 
     def take_move(self, field, ships):
         if self.target is None:
-            if self.take_move_on_diagonal(field) is not None:
-                x_on_field, y_on_field = self.take_move_on_diagonal(field)
-                field[y_on_field][x_on_field].on_mouse_click(
-                    x_on_field=x_on_field,
-                    y_on_field=y_on_field,
-                    field=field
-                )
-                searching_ship = None
-                if field[y_on_field][x_on_field].type == 3:
-                    for ship in range(len(ships)):
-                        for deck in range(len(ships[ship])):
-                            if ships[ship][deck] == field[y_on_field][x_on_field]:
-                                searching_ship = ships[ship]
-                    self.target = searching_ship
-                    self.defeated_deck = field[y_on_field][x_on_field]
-                    if self.drawer_ships.is_kill(self.target, "bool"):
-                        self.drawer_ships.tick_cells_around_ship(self.target, field)
-                        return False
-                    return True
-                return False
-            elif self.take_move_on_diagonal(field) is None:
-                x_on_field, y_on_field = self.take_random_move(field, len(field))
-                field[y_on_field][x_on_field].on_mouse_click(
-                    x_on_field=x_on_field,
-                    y_on_field=y_on_field,
-                    field=field
-                )
-                searching_ship = None
-                if field[y_on_field][x_on_field].type == 3:
-                    for ship in range(len(ships)):
-                        for deck in range(len(ships[ship])):
-                            if ships[ship][deck] == field[y_on_field][x_on_field]:
-                                searching_ship = ships[ship]
-                    self.target = searching_ship
-                    self.defeated_deck = field[y_on_field][x_on_field]
-                    if self.drawer_ships.is_kill(self.target, "bool"):
-                        self.drawer_ships.tick_cells_around_ship(self.target, field)
-                        return False
-                    return True
-                return False
+            weights = self.get_probability_map(field)
+            best_coords = []
+            max_weight = 0
+            for y in range(len(field)):
+                for x in range(len(field)):
+                    if field[y][x].type < 2:
+                        if weights[y][x] >= max_weight:
+                            max_weight = weights[y][x]
+                            best_coords = [(x, y)]
+                        elif weights[y][x] == max_weight:
+                            best_coords.append((x, y))
+            x_from_coord, y_from_coord = self.shoot_on_coord(best_coords, field)
+            if field[y_from_coord][x_from_coord].type == 3:
+                self.start_hunting(field, ships, x_from_coord, y_from_coord)
+                return True
+            return False
+
         elif self.target is not None:
             if not self.hunt_move(field, ships):
                 return False
@@ -63,48 +53,22 @@ class AIgame:
                 if self.drawer_ships.is_kill(self.target, "bool"):
                     self.drawer_ships.tick_cells_around_ship(self.target, field)
                     self.reset_hunt()
-                    return False
                 return True
 
-
-
-    def get_cells(self, field, len_field):
-        cells = []
-        for y in range(len_field):
-            for x in range(len_field):
-                if field[y][x].type != 3 and field[y][x].type != 2:
-                    cells.append((x, y))
-        return cells
-
-    def take_random_move(self, field, len_field):
-        cells = []
-        for y in range(len_field):
-            for x in range(len_field):
-                if field[y][x].type != 3 and field[y][x].type != 2:
-                    cells.append((x, y))
-        x_on_field, y_on_field = choice(cells)
-        return x_on_field, y_on_field
-
-    def get_diagonal_cells(self, field, len_field, max_ship_len):
-        cells = []
-        for y in range(len_field):
-            for x in range(len_field):
-                if (x % max_ship_len) == (y % max_ship_len) and field[y][x].type != 3 and field[y][x].type != 2:
-                    cells.append((x, y))
-        return cells
-
-    def take_move_on_diagonal(self, field):
-        cells = self.get_diagonal_cells(field, len(field), 4)
-        available = []
-        for x_on_field, y_on_field in cells:
-            if getattr(field[y_on_field][x_on_field], 'type') != 2 and \
-                    getattr(field[y_on_field][x_on_field], 'type') != 3:
-                available.append((x_on_field, y_on_field))
-        if cells:
-            x_on_field, y_on_field = choice(cells)
-            return x_on_field, y_on_field
-        else:
-            return None
+    def start_hunting(self, field, ships, x, y):
+        searching_ship = None
+        for ship in range(len(ships)):
+            for deck in range(len(ships[ship])):
+                if ships[ship][deck] == field[y][x]:
+                    searching_ship = ships[ship]
+        self.target = searching_ship
+        self.defeated_deck = field[y][x]
+        if self.drawer_ships.is_kill(self.target, "bool"):
+            ship_len = len(self.target)
+            if ship_len in self.ships_len:
+                self.ships_len.remove(ship_len)
+            self.drawer_ships.tick_cells_around_ship(self.target, field)
+            self.reset_hunt()
 
     def shoot_on_coord(self, coordinates, field):
         x_from_coord, y_from_coord = choice(coordinates)
@@ -119,7 +83,6 @@ class AIgame:
         self.target = None
         self.defeated_deck = None
         self.first_deck = True
-
 
     def hunt_move(self, field, ships):
         if not self.drawer_ships.is_kill(self.target, "bool"):

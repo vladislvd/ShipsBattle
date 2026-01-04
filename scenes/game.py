@@ -17,7 +17,7 @@ class GameScene:
         self.turn = 'Player'
         self.dragged_object = None
         self.is_game = True
-        self.time_ai_sleep = 0.5
+        self.time_ai_sleep = 0.8
         self.draw_player_field = objects.FieldDrawer(window_width=self.window_width,
                                                      window_height=self.window_height,
                                                      batch=self.batch,
@@ -56,15 +56,6 @@ class GameScene:
         self.AI_game = logic.AIgame(ships=self.player_ships.ships,
                                     shipsDrawer=self.player_ships
                                     )
-
-        """
-        ДЛЯ ТЕСТОВ. УДАЛИТЬ!!
-        """
-        self.player_ships_on_field = logic.PuttingAIShips(
-            field=self.draw_player_field.field,
-            ships=self.player_ships.ships,
-            filedDrawer=self.draw_player_field
-        )
         self.end_text = pyglet.text.Label(
             text='',
             color=(255, 0, 0),
@@ -78,6 +69,16 @@ class GameScene:
         """
         ДЛЯ ТЕСТОВ. УДАЛИТЬ!!
         """
+        self.player_ships_on_field = logic.PuttingAIShips(
+            field=self.draw_player_field.field,
+            ships=self.player_ships.ships,
+            filedDrawer=self.draw_player_field
+        )
+        """
+        ДЛЯ ТЕСТОВ. УДАЛИТЬ!!
+        """
+        
+        
 
     def draw(self):
         glClearColor(0.12, 0.20, 0.22, 1.0)
@@ -175,6 +176,7 @@ class GameScene:
 
     def process_logic(self, dt):
         if self.is_game and self.turn == 'AI':
+            self.AI_game.get_probability_map(self.draw_player_field.field)
             if self.AI_game.take_move(field=self.draw_player_field.field,
                                       ships=self.player_ships.ships,
                                       ):
