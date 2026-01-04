@@ -177,7 +177,6 @@ class GameScene:
         if self.is_game and self.turn == 'AI':
             if self.AI_game.take_move(field=self.draw_player_field.field,
                                       ships=self.player_ships.ships,
-                                      game_scene=self
                                       ):
                 self.turn = 'AI'
                 pyglet.clock.schedule_once(self.process_logic, self.time_ai_sleep)
@@ -186,5 +185,4 @@ class GameScene:
             self.is_ai_win()
 
     def update(self, dt):
-        # self.process_logic(dt)
         self.on_key_press()

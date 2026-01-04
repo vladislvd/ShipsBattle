@@ -43,6 +43,8 @@ class ShipsDrawer:
                 if ship[deck].type == 1:
                     coordinates.append([ship[deck].x_on_field, ship[deck].y_on_field])
             return coordinates
+        elif return_type == "killed_decks":
+            return killed_decks
 
     def tick_cells_around_ship(self, ship, field, double_field=None):
         for deck in range(len(ship)):
