@@ -66,17 +66,11 @@ class GameScene:
             anchor_y='center',
             batch=self.batch
         )
-        """
-        ДЛЯ ТЕСТОВ. УДАЛИТЬ!!
-        """
-        self.player_ships_on_field = logic.PuttingAIShips(
-            field=self.draw_player_field.field,
-            ships=self.player_ships.ships,
-            filedDrawer=self.draw_player_field
-        )
-        """
-        ДЛЯ ТЕСТОВ. УДАЛИТЬ!!
-        """
+        # self.player_ships_on_field = logic.PuttingAIShips(
+        #     field=self.draw_player_field.field,
+        #     ships=self.player_ships.ships,
+        #     filedDrawer=self.draw_player_field
+        # )
         
         
 
@@ -194,6 +188,7 @@ class GameScene:
                 self.turn = 'AI'
                 pyglet.clock.schedule_once(self.process_logic, self.time_ai_sleep)
             else:
+                pyglet.clock.schedule_once(self.process_logic, self.time_ai_sleep)
                 self.turn = 'Player'
             self.is_ai_win()
 
