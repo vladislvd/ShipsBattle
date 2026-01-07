@@ -26,7 +26,13 @@ class GameScene:
                                                  field_data=self.AI_field.field,
                                                  x_loc=window_width//2 + 100
                                                  )
-        self.player_ship = objects.ShipsDrawer(
+        self.draw_double_AI_field = objects.FieldDrawer(window_width=self.window_width,
+                                                        window_height=self.window_height,
+                                                        batch=None,
+                                                        field_data=self.AI_field.field,
+                                                        x_loc=window_width // 2 + 100
+                                                        )
+        self.player_ships = objects.ShipsDrawer(
             batch=self.batch,
             start_x=self.draw_player_field.field[0][0].x,
             start_y=self.draw_player_field.field[0][0].y - (config.CELL_SIZE + config.BORDER_SIZE*4),
