@@ -62,3 +62,18 @@ class ShipsDrawer:
             for deck in range(len(ships[ship])):
                 if ships[ship][deck] == field[y_on_field][x_on_field]:
                     return ships[ship]
+
+    def check_around(self, decks, x_on_field, y_on_field, rotate, size, field):
+        for cell in range(decks):
+            cx = x_on_field + (cell if rotate == 'x' else 0)
+            cy = y_on_field + (cell if rotate == 'y' else 0)
+            
+            if not (0 <= cx < size and 0 <= cy < size):
+                return False
+
+            for x, y in product([-1, 0, 1], repeat=2):
+                dx, dy = cx + x, cy + y
+                if 0 <= dx < size and 0 <= dy < size:
+                    if field[dy][dx].type == 1:
+                        return False
+        return True

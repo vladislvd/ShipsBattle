@@ -32,7 +32,7 @@ class GameScene:
                                                  )
         self.draw_double_AI_field = objects.FieldDrawer(window_width=self.window_width,
                                                         window_height=self.window_height,
-                                                        batch=self.batch,
+                                                        batch=None,
                                                         field_data=self.AI_field.field,
                                                         x_loc=window_width // 2 + 100
                                                         )
@@ -51,7 +51,8 @@ class GameScene:
         self.AI_ships_on_field = logic.PuttingAIShips(
             field=self.draw_AI_field.field,
             ships=self.AI_ships.ships,
-            filedDrawer=self.draw_AI_field
+            filedDrawer=self.draw_AI_field,
+            shipsDrawer=self.AI_ships
         )
         self.AI_game = logic.AIgame(ships=self.player_ships.ships,
                                     shipsDrawer=self.player_ships

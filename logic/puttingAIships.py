@@ -5,31 +5,17 @@ from operator import itemgetter
 
 
 class PuttingAIShips:
-    def __init__(self, field, ships, filedDrawer):
+    def __init__(self, field, ships, filedDrawer, shipsDrawer):
         self.field = field
         self.ships = ships
         self.filedDrawer = filedDrawer
+        self.shipsDrawer = shipsDrawer
         self.max_attempts = 100
         self.ships_len = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1]
-        self.put_ai_ships(ships)
+        self.put_ai_ships(ships, field)
 
 
-    def check_around(self, decks, x_on_field, y_on_field, rotate, size):
-        for cell in range(decks):
-            cx = x_on_field + (cell if rotate == 'x' else 0)
-            cy = y_on_field + (cell if rotate == 'y' else 0)
-            
-            if not (0 <= cx < size and 0 <= cy < size):
-                return False
-
-            for x, y in product([-1, 0, 1], repeat=2):
-                dx, dy = cx + x, cy + y
-                if 0 <= dx < size and 0 <= dy < size:
-                    if self.field[dy][dx].type == 1:
-                        return False
-        return True
-
-    def get_probability_map(self):
+    def get_probability_map(self, field):
         size = len(self.field)
         weights = [[0 for _ in range(size)] for _ in range(size)]
         current_ships_len = self.ships_len
@@ -38,23 +24,23 @@ class PuttingAIShips:
                 for x in range(size):   
                     can_place_x = (x + ship_len <= size)
                     can_place_y = (y + ship_len <= size)
-                    if can_place_x and self.check_around(ship_len, x, y, 'x', size):
+                    if can_place_x and self.shipsDrawer.check_around(ship_len, x, y, 'x', size, field):
                             for i in range(ship_len):
                                 weights[y][x+i] += 1
-                    if can_place_y and self.check_around(ship_len, x, y, 'y', size):
+                    if can_place_y and self.shipsDrawer.check_around(ship_len, x, y, 'y', size, field):
                         for i in range(ship_len):
                             weights[y+i][x] += 1
         return weights
 
-    def get_x_y(self, decks):
+    def get_x_y(self, decks, field):
         size = len(self.field)
-        weights = self.get_probability_map()
+        weights = self.get_probability_map(field)
         coords = []
         for rotate in ['x','y']:
             for y in range(size):
                 for x in range(size):
                     if (rotate == 'x' and x + decks <= size) or (rotate == 'y' and y + decks <= size):
-                        if self.check_around(decks, x, y, rotate, size):
+                        if self.shipsDrawer.check_around(decks, x, y, rotate, size, field):
                             current_weight = 0
                             for i in range(decks):
                                 cx = x + (i if rotate == 'x' else 0)
@@ -68,15 +54,15 @@ class PuttingAIShips:
         weight, x, y ,rotate = random.choice(best_coords)
         return x, y ,rotate
 
-    def put_ai_ships(self, ships):
+    def put_ai_ships(self, ships, field):
         self.filedDrawer.clear_field()
         
         for i, decks in enumerate(self.ships_len):
-            result = self.get_x_y(decks)
+            result = self.get_x_y(decks, field)
             if result is None:
                 self.put_ai_ships()
                 return
-            x, y, rotate = self.get_x_y(decks)
+            x, y, rotate = self.get_x_y(decks, field)
             ai_ship = []
             for d in range(decks):
                 cx = x + (d if rotate == 'x' else 0)
