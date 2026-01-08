@@ -1,5 +1,7 @@
-﻿import pyglet
+﻿import re
+import pyglet
 import pyglet.clock
+from pyglet.gl.lib import errcheck
 import config
 import logic
 import objects
@@ -107,9 +109,20 @@ class GameScene:
             if not pos:
                 for ship in ships:
                     for deck in ship:
-                        if deck.on_field == False:
+                        if deck.error == True:
                             deck.set_type(4)
                 return False
+            else:
+                x_on_field, y_on_field = pos
+                if not self.player_ships.check_around(len(ship), x_on_field, y_on_field, ship[0].rotate, 10, self.draw_player_field.field, True):
+                    for deck in ship:
+                        deck.error = True
+                        deck.set_type(4)
+                    return False
+                else:
+                    for deck in ship:
+                        deck.error = False
+                        deck.on_field = True
         for ship_ind in range(len(ships)):
             ship = ships[ship_ind]
             x_on_field, y_on_field = self.mouse_to_field(ship[0].x, ship[0].y, self.draw_player_field)
@@ -131,9 +144,11 @@ class GameScene:
                 dragged = False
                 for deck in ship:
                     if deck.mouse_on(x, y):
+                        if deck.on_field:
+                            for deck in ship:
+                                x_on_field, y_on_field = self.mouse_to_field(deck.x, deck.y, self.draw_player_field)
+                                self.draw_player_field.field[y_on_field][x_on_field].set_type(0)
                         dragged = True
-                        deck.offset_x = x - deck.x
-                        deck.offset_y = y - deck.y
                 if dragged:
                     self.dragged_object = ship
 
@@ -141,6 +156,7 @@ class GameScene:
         if self.dragged_object is not None and not self.is_game:
             i = x
             for deck in self.dragged_object:
+                deck.error = False
                 deck.set_type(1)
                 right_side = x + len(self.dragged_object) * config.CELL_SIZE + config.BORDER_SIZE*2
                 if right_side < self.start_button.x or x > self.start_button.x + self.start_button.width or \
@@ -154,18 +170,37 @@ class GameScene:
             pos = self.mouse_to_field(x, y, self.draw_player_field)
             if not pos:
                 for deck in self.dragged_object:
+                    deck.error = True
                     deck.on_field = False
                 self.dragged_object = None
                 return False
             x_on_field, y_on_field = pos
             field_start_x = self.draw_player_field.field[0][0].x
             field_start_y = self.draw_player_field.field[0][0].y
-            i = 0
-            for deck in self.dragged_object:
+            for i, deck in enumerate(self.dragged_object):
+                rotate = deck.rotate
+                cx = x_on_field + (i if rotate == 'x' else 0)
+                cy = y_on_field + (i if rotate == 'y' else 0)
+                if self.draw_player_field.field[cy][cx].type == 1:
+                    for deck in self.dragged_object:
+                        deck.error = True
+                        deck.set_type(4)
+                    return False
+            for i, deck in enumerate(self.dragged_object):
+                rotate = deck.rotate
                 deck.x = field_start_x + x_on_field * (config.CELL_SIZE + config.BORDER_SIZE) + i * (config.CELL_SIZE + config.BORDER_SIZE)
                 deck.y = field_start_y + y_on_field * (config.CELL_SIZE + config.BORDER_SIZE)
+                cx = x_on_field + (i if rotate == 'x' else 0)
+                cy = y_on_field + (i if rotate == 'y' else 0)
+                self.draw_player_field.field[cy][cx].set_type(1)
+                deck.error = False
                 deck.on_field = True
-                i += 1
+                
+            if not self.player_ships.check_around(len(self.dragged_object), x_on_field, y_on_field, deck.rotate, 10, self.draw_player_field.field, True):
+                for deck in self.dragged_object:
+                    deck.error = True
+                    deck.set_type(4)
+
             self.dragged_object = None
 
     def mouse_press_ai(self, x, y):

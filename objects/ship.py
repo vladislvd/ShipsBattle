@@ -64,20 +64,37 @@ class ShipsDrawer:
                 if ships[ship][deck] == field[y_on_field][x_on_field]:
                     return ships[ship]
 
-    def check_around(self, decks, x_on_field, y_on_field, rotate, size, field):
-        for cell in range(decks):
-            cx = x_on_field + (cell if rotate == 'x' else 0)
-            cy = y_on_field + (cell if rotate == 'y' else 0)
-            
-            if not (0 <= cx < size and 0 <= cy < size):
-                return False
-
-            for x, y in product([-1, 0, 1], repeat=2):
-                dx, dy = cx + x, cy + y
-                if 0 <= dx < size and 0 <= dy < size:
-                    if field[dy][dx].type == 1:
-                        return False
-        return True
+    def check_around(self, ship_len, x_on_field, y_on_field, rotate, size, field, for_pl = False):
+        if not for_pl:
+            for cell in range(ship_len):
+                cx = x_on_field + (cell if rotate == 'x' else 0)
+                cy = y_on_field + (cell if rotate == 'y' else 0)
+                if not (0 <= cx < size and 0 <= cy < size):
+                    return False
+                for x, y in product([-1, 0, 1], repeat=2):
+                    dx, dy = cx + x, cy + y
+                    if 0 <= dx < size and 0 <= dy < size:
+                        if field[dy][dx].type == 1:
+                            return False
+            return True
+        else:
+            ship_cells = set()
+            for cell in range(ship_len):
+                cx = x_on_field + (cell if rotate == 'x' else 0)
+                cy = y_on_field + (cell if rotate == 'y' else 0)
+                ship_cells.add((cx,cy))
+                
+            for cx, cy in ship_cells:
+                if not (0 <= cx < size and 0 <= cy < size):
+                    return False
+                for x, y in product([-1, 0, 1], repeat=2):
+                    dx, dy = cx + x, cy + y
+                    if (dx, dy) in ship_cells:
+                        continue
+                    if 0 <= dx < size and 0 <= dy < size:
+                        if field[dy][dx].type == 1:
+                            return False
+            return True
 
     def check_rotate(self):
         for ship in self.ships:

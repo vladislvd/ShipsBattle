@@ -16,6 +16,7 @@ class Cell(pyglet.shapes.Rectangle):
         self.rotate = ''
         self.x_on_field = None
         self.y_on_field = None
+        self.error = True
         self.on_field = False
         self.dot = pyglet.shapes.Circle(
             x=self.x + self.width//2,
