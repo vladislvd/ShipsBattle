@@ -61,6 +61,7 @@ class AIgame:
             for deck in range(len(ships[ship])):
                 if ships[ship][deck] == field[y][x]:
                     searching_ship = ships[ship]
+                    break
         self.target = searching_ship
         self.defeated_deck = field[y][x]
         if self.drawer_ships.is_kill(self.target, "bool"):

@@ -1,4 +1,5 @@
 from itertools import product
+from operator import le
 
 import objects
 import config
@@ -77,3 +78,14 @@ class ShipsDrawer:
                     if field[dy][dx].type == 1:
                         return False
         return True
+
+    def check_rotate(self):
+        for ship in self.ships:
+            if all(deck.x == ship[0].x for deck in ship):
+                for deck in ship:
+                    deck.rotate = "y"
+            elif all(deck.y == ship[0].y for deck in ship):
+                for deck in ship:
+                    deck.rotate = "x"
+
+

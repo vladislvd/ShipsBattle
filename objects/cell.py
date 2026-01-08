@@ -14,8 +14,9 @@ class Cell(pyglet.shapes.Rectangle):
         )
         self.type = type
         self.rotate = ''
-        self.x_on_field = 0
-        self.y_on_field = 0
+        self.x_on_field = None
+        self.y_on_field = None
+        self.on_field = False
         self.dot = pyglet.shapes.Circle(
             x=self.x + self.width//2,
             y=self.y + self.height//2,
@@ -39,6 +40,7 @@ class Cell(pyglet.shapes.Rectangle):
         # 1 - корабль
         # 2 - мимо
         # 3 - попадание
+        # 4 - error
 
     def check_types(self):
         if self.type == 0:
@@ -61,6 +63,8 @@ class Cell(pyglet.shapes.Rectangle):
             self.dot.visible = False
             self.cross.line1.visible = True
             self.cross.line2.visible = True
+        if self.type == 4:
+            self.color = config.RED_ERROR
 
     def set_ship(self, x_on_field, y_on_field, field):
         field[y_on_field][x_on_field].type = 1

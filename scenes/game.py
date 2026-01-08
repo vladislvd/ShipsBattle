@@ -1,4 +1,4 @@
-import pyglet
+﻿import pyglet
 import pyglet.clock
 import config
 import logic
@@ -17,7 +17,7 @@ class GameScene:
         self.AI_field = logic.AIField()
         self.turn = 'Player'
         self.dragged_object = None
-        self.is_game = True
+        self.is_game = False
         self.time_ai_sleep = 0
         self.draw_player_field = objects.FieldDrawer(window_width=self.window_width,
                                                      window_height=self.window_height,
@@ -43,6 +43,7 @@ class GameScene:
             start_y=self.draw_player_field.field[0][0].y - (config.CELL_SIZE + config.BORDER_SIZE*4),
             max_long=4
         )
+        self.player_ships.check_rotate()
         self.AI_ships = objects.ShipsDrawer(
             batch=self.batch,
             start_x=self.draw_AI_field.field[0][0].x,
@@ -77,49 +78,56 @@ class GameScene:
             color=(0, 255, 0),
             batch=self.batch,
         )
-        # self.player_ships_on_field = logic.PuttingAIShips(
-        #     field=self.draw_player_field.field,
-        #     ships=self.player_ships.ships,
-        #     filedDrawer=self.draw_player_field
-        # )
-        
         
 
     def draw(self):
         glClearColor(0.12, 0.20, 0.22, 1.0)
         self.batch.draw()
 
-    # def place_player_ships(self, ship, x_on_field, y_on_field, rotate):
-    #     size = len(self.draw_player_field.field)
-    #     if not self.player_ships.check_around(len(ship), x_on_field, y_on_field, rotate, size, self.draw_player_field.field):
-    #         return False
-    #     for i, cell in enumerate(ship):
-    #         cx = x_on_field + (i if rotate == 'x' else 0)
-    #         cy = y_on_field + (i if rotate == 'y' else 0)
-    #         field_cell = self.draw_player_field.field[cy][cx]
-    #         cell.x = field_cell.x
-    #         cell.y = field_cell.y
-    #         cell.x_on_field = cx
-    #         cell.y_on_field = cy
-    #         cell.type = 1
-    #         self.draw_player_field.field[cy][cx] = cell
+    def place_player_ships(self, ship, x_on_field, y_on_field, rotate, ship_index):
+        size = len(self.draw_player_field.field)
+        if not self.player_ships.check_around(len(ship), x_on_field, y_on_field, rotate, size, self.draw_player_field.field):
+            return False
+        pl_ship = []
+        for i, deck in enumerate(ship):
+            cx = x_on_field + (i if rotate == 'x' else 0)
+            cy = y_on_field + (i if rotate == 'y' else 0)
+            field_cell = self.draw_player_field.field[cy][cx]
+            field_cell.x_on_field = cx
+            field_cell.y_on_field = cy
+            field_cell.set_type(1)
+            pl_ship.append(field_cell)
+        self.player_ships.ships[ship_index] = pl_ship
 
-    # def confirm_player_ships(self):
-    #     for ship in self.player_ships.ships:
-    #         self.place_player_ships(ship, ship[0].x_on_field, ship[0].y_on_field, ship[0].rotate)
+    def confirm_player_ships(self):
+        ships = self.player_ships.ships
+        for ship_ind in range(len(ships)):
+            ship = ships[ship_ind]
+            pos = self.mouse_to_field(ship[0].x, ship[0].y, self.draw_player_field)
+            if not pos:
+                for ship in ships:
+                    for deck in ship:
+                        if deck.on_field == False:
+                            deck.set_type(4)
+                return False
+        for ship_ind in range(len(ships)):
+            ship = ships[ship_ind]
+            x_on_field, y_on_field = self.mouse_to_field(ship[0].x, ship[0].y, self.draw_player_field)
+            self.place_player_ships(ship, x_on_field, y_on_field, ship[0].rotate, ship_ind)
+        return True
 
     def on_mouse_press(self, x, y, button):
         if self.start_button.on_click(x, y):
-            self.confirm_player_ships()
+            if not self.confirm_player_ships():
+                return False
             self.start_button.label.delete()
             self.start_button.delete()
-        try:
-            if x > self.window_width//2 and self.is_game:
+            self.is_game = True
+        if x > self.window_width//2 and self.is_game:
                 self.mouse_press_ai(x, y)
-        except:
-            pass
-        if button == pyglet.window.mouse.LEFT:
-            for ship in self.player_ships.ships:
+        if button == pyglet.window.mouse.LEFT and not self.is_game and self.dragged_object == None:
+            ships = self.player_ships.ships
+            for ship in ships:
                 dragged = False
                 for deck in ship:
                     if deck.mouse_on(x, y):
@@ -130,17 +138,24 @@ class GameScene:
                     self.dragged_object = ship
 
     def on_mouse_drag(self, x, y, buttons):
-        if self.dragged_object is not None:
+        if self.dragged_object is not None and not self.is_game:
             i = x
             for deck in self.dragged_object:
-                deck.x = i
-                deck.y = y
-                i += (config.CELL_SIZE + config.BORDER_SIZE)
+                deck.set_type(1)
+                right_side = x + len(self.dragged_object) * config.CELL_SIZE + config.BORDER_SIZE*2
+                if right_side < self.start_button.x or x > self.start_button.x + self.start_button.width or \
+                    y + config.CELL_SIZE < self.start_button.y or y > self.start_button.y + self.start_button.height:
+                    deck.x = i
+                    deck.y = y
+                    i += (config.CELL_SIZE + config.BORDER_SIZE)
 
     def on_mouse_release(self, x, y, button):
         if self.dragged_object is not None:
             pos = self.mouse_to_field(x, y, self.draw_player_field)
             if not pos:
+                for deck in self.dragged_object:
+                    deck.on_field = False
+                self.dragged_object = None
                 return False
             x_on_field, y_on_field = pos
             field_start_x = self.draw_player_field.field[0][0].x
@@ -149,6 +164,7 @@ class GameScene:
             for deck in self.dragged_object:
                 deck.x = field_start_x + x_on_field * (config.CELL_SIZE + config.BORDER_SIZE) + i * (config.CELL_SIZE + config.BORDER_SIZE)
                 deck.y = field_start_y + y_on_field * (config.CELL_SIZE + config.BORDER_SIZE)
+                deck.on_field = True
                 i += 1
             self.dragged_object = None
 
@@ -217,14 +233,12 @@ class GameScene:
 
     def process_logic(self, dt):
         if self.is_game and self.turn == 'AI':
-            self.AI_game.get_probability_map(self.draw_player_field.field)
             if self.AI_game.take_move(field=self.draw_player_field.field,
                                       ships=self.player_ships.ships,
                                       ):
                 self.turn = 'AI'
                 pyglet.clock.schedule_once(self.process_logic, self.time_ai_sleep)
             else:
-                pyglet.clock.schedule_once(self.process_logic, self.time_ai_sleep)
                 self.turn = 'Player'
             self.is_ai_win()
 

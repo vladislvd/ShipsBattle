@@ -67,7 +67,6 @@ class PuttingAIShips:
             for d in range(decks):
                 cx = x + (d if rotate == 'x' else 0)
                 cy = y + (d if rotate == 'y' else 0)
-
                 cell = self.field[cy][cx]
                 cell.set_type(1)
                 cell.x_on_field = cx
