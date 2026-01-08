@@ -13,6 +13,9 @@ class Cell(pyglet.shapes.Rectangle):
             batch=batch
         )
         self.type = type
+        self.rotate = ''
+        self.x_on_field = 0
+        self.y_on_field = 0
         self.dot = pyglet.shapes.Circle(
             x=self.x + self.width//2,
             y=self.y + self.height//2,
@@ -68,8 +71,10 @@ class Cell(pyglet.shapes.Rectangle):
 
     def on_mouse_click(self, x_on_field, y_on_field, field):
         if field[y_on_field][x_on_field].type == 0:
-            field[y_on_field][x_on_field].type = 2
-            field[y_on_field][x_on_field].check_types()
+            field[y_on_field][x_on_field].set_type(2)
         if field[y_on_field][x_on_field].type == 1:
-            field[y_on_field][x_on_field].type = 3
-            field[y_on_field][x_on_field].check_types()
+            field[y_on_field][x_on_field].set_type(3)
+
+    def set_type(self, type_on_set):
+        self.type = type_on_set
+        self.check_types()
