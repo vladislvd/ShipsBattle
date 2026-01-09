@@ -2,6 +2,7 @@
 import pyglet
 import pyglet.clock
 from pyglet.gl.lib import errcheck
+from pyglet.graphics import Batch
 from pyglet.graphics.shader import _introspect_attributes
 import application
 import config
@@ -23,7 +24,7 @@ class GameScene:
         self.dragged_object = None
         self.is_game = False
         self.is_placing = True
-        self.time_ai_sleep = 0
+        self.time_ai_sleep = 0.8
         self.ai_win = False
         self.pl_win = False
         self.draw_player_field = objects.FieldDrawer(window_width=self.window_width,
@@ -45,6 +46,9 @@ class GameScene:
                                                         x_loc=window_width // 2 + 135
                                                         )
         self.init_components_for_game()
+        self.move_arrow = objects.Arrow(x=self.draw_AI_field.field[9][5].x - config.ANCHOR - config.BORDER_SIZE//2,
+                                       y=self.draw_AI_field.field[9][0].y + config.CELL_SIZE + 10,
+                                       batch=self.batch)
         self.clear_pl_field_button = widgets.Border_Button(x=self.draw_player_field.field[9][8].x + config.ANCHOR + config.BORDER_SIZE,
                                                            y=self.draw_player_field.field[9][0].y + config.CELL_SIZE + 10,
                                                            width=config.CELL_SIZE*2,
@@ -311,6 +315,7 @@ class GameScene:
                         )
             else:
                 self.turn = 'AI'
+                self.move_arrow.update_x(self.draw_player_field.field[9][5].x - config.ANCHOR - config.BORDER_SIZE//2)
             self.is_pl_win()
             pyglet.clock.schedule_once(self.process_logic, self.time_ai_sleep)
 
@@ -393,6 +398,7 @@ class GameScene:
                 pyglet.clock.schedule_once(self.process_logic, self.time_ai_sleep)
             else:
                 self.turn = 'Player'
+                self.move_arrow.update_x(self.draw_AI_field.field[9][5].x - config.ANCHOR - config.BORDER_SIZE//2)
             self.is_ai_win()
 
     def update(self, dt):
