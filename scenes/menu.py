@@ -44,9 +44,9 @@ class MenuScene:
     def on_mouse_release(self, x, y, button):
         pass
 
-    def on_key_press(self):
-        if self.application.keys[pyglet.window.key._2]:
+    def on_key_press(self, symbol, modifiers):
+        if symbol == pyglet.window.key._2:
             self.application.switch_scene('game')
 
     def update(self, dt):
-        self.on_key_press()
+        pass

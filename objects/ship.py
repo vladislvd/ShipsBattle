@@ -1,5 +1,8 @@
 from itertools import product
 from operator import le
+from re import S
+
+from pyglet.text import decode_attributed
 
 import objects
 import config
@@ -105,4 +108,15 @@ class ShipsDrawer:
                 for deck in ship:
                     deck.rotate = "x"
 
-
+    def change_rotate(self, ship, rotate, mouse_x, mouse_y):
+        if ship[0].rotate == rotate:
+            return False
+        for i, deck in enumerate(ship):
+            deck.rotate = rotate
+            step = i * (config.CELL_SIZE + config.BORDER_SIZE)
+            if rotate == 'x':
+                deck.x = mouse_x + step
+                deck.y = mouse_y
+            else:
+                deck.x = mouse_x
+                deck.y = mouse_y + step
