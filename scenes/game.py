@@ -375,6 +375,7 @@ class GameScene:
         self.end_text.visible = False
         self.draw_player_field.clear_field()
         self.draw_AI_field.clear_field()
+        self.move_arrow.update_x(self.draw_AI_field.field[9][5].x - config.ANCHOR - config.BORDER_SIZE//2)
         for row in self.draw_double_AI_field.field:
             for cell in row:
                 cell.visible = True
