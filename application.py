@@ -36,5 +36,8 @@ class Application(pyglet.window.Window):
     def on_key_press(self, symbol, modifiers):
         self.scenes[self.current_scene].on_key_press(symbol, modifiers)
 
+    def on_mouse_motion(self, x, y, dx, dy):
+        self.scenes[self.current_scene].on_mouse_motion( x, y, dx, dy)
+
     def update(self, dt):
         self.scenes[self.current_scene].update(dt)

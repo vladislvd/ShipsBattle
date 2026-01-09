@@ -59,7 +59,7 @@ class ShipsDrawer:
                     if field[y_on_field + y][x_on_field + x].type != 3:
                         field[y_on_field + y][x_on_field + x].set_type(2)
                         if double_field is not None:
-                            double_field[y_on_field + y][x_on_field + x].delete()
+                            double_field[y_on_field + y][x_on_field + x].visible = False
 
     def find_ship(self, ships, field, x_on_field, y_on_field):
         for ship in range(len(ships)):
@@ -120,3 +120,9 @@ class ShipsDrawer:
             else:
                 deck.x = mouse_x
                 deck.y = mouse_y + step
+
+    def delete_ships(self):
+        for ship in self.ships:
+            for deck in ship:
+                deck.delete()
+        self.ships = []

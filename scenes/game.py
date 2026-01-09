@@ -2,6 +2,8 @@
 import pyglet
 import pyglet.clock
 from pyglet.gl.lib import errcheck
+from pyglet.graphics.shader import _introspect_attributes
+import application
 import config
 import logic
 import objects
@@ -22,6 +24,8 @@ class GameScene:
         self.is_game = False
         self.is_placing = True
         self.time_ai_sleep = 0
+        self.ai_win = False
+        self.pl_win = False
         self.draw_player_field = objects.FieldDrawer(window_width=self.window_width,
                                                      window_height=self.window_height,
                                                      batch=self.batch,
@@ -32,14 +36,70 @@ class GameScene:
                                                  window_height=self.window_height,
                                                  batch=self.batch,
                                                  field_data=self.AI_field.field,
-                                                 x_loc=window_width//2 + 100
+                                                 x_loc=window_width//2 + 135
                                                  )
         self.draw_double_AI_field = objects.FieldDrawer(window_width=self.window_width,
                                                         window_height=self.window_height,
-                                                        batch=None,
+                                                        batch=self.batch,
                                                         field_data=self.AI_field.field,
-                                                        x_loc=window_width // 2 + 100
+                                                        x_loc=window_width // 2 + 135
                                                         )
+        self.init_components_for_game()
+        self.clear_pl_field_button = widgets.Border_Button(x=self.draw_player_field.field[9][8].x + config.ANCHOR + config.BORDER_SIZE,
+                                                           y=self.draw_player_field.field[9][0].y + config.CELL_SIZE + 10,
+                                                           width=config.CELL_SIZE*2,
+                                                           height=35,
+                                                           border=3,
+                                                           border_color=(255, 255, 255),
+                                                           color=(31, 51, 56),
+                                                           text="Clear",
+                                                           batch=self.batch
+                                                           )
+        self.end_text = pyglet.text.Label(
+            text='PLAYER WIN',
+            color=config.END_TEXT,
+            x=window_width//2,
+            y=window_height - window_height//15,
+            font_size=60,
+            font_name="Agency FB",
+            anchor_x='center',
+            anchor_y='center',
+            batch=self.batch
+        )
+        self.end_text.visible = False
+        self.start_button = widgets.Button(
+            x=window_width//2,
+            y=window_height//4 - 50,
+            width=200,
+            height=50,
+            text="Start",
+            color=config.START_BUTTON,
+            batch=self.batch,
+        )
+        self.back_button = widgets.Button(
+            x=window_width//2 - 150,
+            y=window_height//4 - 50,
+            width=200,
+            height=50,
+            color=config.CLOSE_BUTTON,
+            text="Back to menu",
+            batch=self.batch,
+        )
+        self.back_button.visible = False
+        self.back_button.label.visible = False
+        self.reset_button = widgets.Button(
+            x=window_width//2 + 150,
+            y=window_height//4 - 50,
+            width=200,
+            height=50,
+            color=config.START_BUTTON,
+            text="Reset",
+            batch=self.batch,
+        )
+        self.reset_button.visible = False
+        self.reset_button.label.visible = False
+    
+    def init_player_ships(self):
         self.player_ships = objects.ShipsDrawer(
             batch=self.batch,
             start_x=self.draw_player_field.field[0][0].x,
@@ -47,6 +107,9 @@ class GameScene:
             max_long=4
         )
         self.player_ships.check_rotate()
+
+    def init_components_for_game(self):
+        self.init_player_ships()
         self.AI_ships = objects.ShipsDrawer(
             batch=self.batch,
             start_x=self.draw_AI_field.field[0][0].x,
@@ -62,26 +125,6 @@ class GameScene:
         self.AI_game = logic.AIgame(ships=self.player_ships.ships,
                                     shipsDrawer=self.player_ships
                                     )
-        self.end_text = pyglet.text.Label(
-            text='',
-            color=(255, 0, 0),
-            x=window_width//2,
-            y=window_height//4,
-            font_size=100,
-            anchor_x='center',
-            anchor_y='center',
-            batch=self.batch
-        )
-        self.start_button = widgets.Button(
-            x=window_width//2 - 100,
-            y=window_height//4 - 25,
-            width=200,
-            height=50,
-            text="Start",
-            color=(0, 255, 0),
-            batch=self.batch,
-        )
-        
 
     def draw(self):
         glClearColor(0.12, 0.20, 0.22, 1.0)
@@ -131,15 +174,16 @@ class GameScene:
             x_on_field, y_on_field = self.mouse_to_field(ship[0].x, ship[0].y, self.draw_player_field)
             self.place_player_ships(ship, x_on_field, y_on_field, ship[0].rotate, ship_ind)
         return True
-
+    
     def on_mouse_press(self, x, y, button):
-        if self.start_button.on_click(x, y):
-            if not self.confirm_player_ships():
-                return False
-            self.start_button.label.delete()
-            self.start_button.delete()
-            self.is_game = True
-            self.is_placing = False
+        if self.start_button.visible == True and self.start_button.mouse_on(x, y):
+            self.start_button.target_scale = 0.85
+        if self.back_button.visible == True and self.back_button.mouse_on(x, y):
+            self.back_button.target_scale = 0.85
+        if self.reset_button.visible == True and self.reset_button.mouse_on(x, y):
+            self.reset_button.target_scale = 0.85
+        if self.clear_pl_field_button.visible == True and self.clear_pl_field_button.mouse_on(x, y):
+            self.clear_pl_field_button.target_scale = 0.85
         if x > self.window_width//2 and self.is_game:
                 self.mouse_press_ai(x, y)
         if button == pyglet.window.mouse.LEFT and self.is_placing and self.dragged_object == None:
@@ -179,6 +223,25 @@ class GameScene:
                     i += (config.CELL_SIZE + config.BORDER_SIZE)
 
     def on_mouse_release(self, x, y, button):
+        if self.start_button.visible == True and self.start_button.mouse_on(x, y):
+            self.start_button.target_scale = 1.0
+            if not self.confirm_player_ships():
+                return False
+            self.start_button.label.visible = False
+            self.start_button.visible = False
+            self.is_game = True
+            self.is_placing = False
+        if self.back_button.visible == True and self.back_button.mouse_on(x, y):
+            self.back_button.target_scale = 1.0
+            application.switch_scene('menu')
+        if self.reset_button.visible == True and self.reset_button.mouse_on(x, y):
+            self.reset_button.target_scale = 1.0
+            self.reset()
+        if self.clear_pl_field_button.visible == True and self.clear_pl_field_button.mouse_on(x, y):
+            self.clear_pl_field_button.target_scale = 1.0
+            self.player_ships.delete_ships()
+            self.init_player_ships()
+            self.draw_player_field.clear_field()
         if self.dragged_object is not None:
             pos = self.mouse_to_field(x, y, self.draw_player_field)
             if not pos:
@@ -230,9 +293,9 @@ class GameScene:
                 return False
             x_on_field, y_on_field = pos
             cell = self.draw_AI_field.field[y_on_field][x_on_field]
+            self.draw_double_AI_field.field[y_on_field][x_on_field].visible = False
             if cell.type == 2 or cell.type == 3:
                 return False
-            self.draw_double_AI_field.field[y_on_field][x_on_field].delete()
             cell.on_mouse_click(x_on_field, y_on_field, self.draw_AI_field.field)
             if cell.type == 3:
                 ship_in_ai_ships = None
@@ -252,8 +315,8 @@ class GameScene:
             pyglet.clock.schedule_once(self.process_logic, self.time_ai_sleep)
 
     def mouse_to_field(self, x, y, field_drawer):
-        start_x = field_drawer.field[0][0].x
-        start_y = field_drawer.field[0][0].y
+        start_x = field_drawer.field[0][0].x - config.ANCHOR
+        start_y = field_drawer.field[0][0].y - config.ANCHOR
         step = config.CELL_SIZE + config.BORDER_SIZE
         cx = int((x - start_x) // step)
         cy = int((y - start_y) // step)
@@ -276,6 +339,7 @@ class GameScene:
                 ai_killed_ships += 1
         if ai_killed_ships == len(self.AI_ships.ships):
             self.end_text.text = "PLAYER WIN"
+            self.pl_win = True
             self.end()
 
     def is_ai_win(self):
@@ -285,10 +349,40 @@ class GameScene:
                 pl_killed_ships += 1
         if pl_killed_ships == len(self.player_ships.ships):
             self.end_text.text = "AI WIN"
+            self.ai_win = True
             self.end()
+
+    def reset(self):
+        self.turn = 'Player'
+        self.dragged_object = None
+        self.is_game = False
+        self.is_placing = True
+        self.ai_win = False
+        self.pl_win = False
+        self.start_button.visible = True
+        self.start_button.label.visible = True
+        self.reset_button.visible = False
+        self.reset_button.label.visible = False
+        self.back_button.visible = False
+        self.back_button.label.visible = False
+        self.end_text.visible = False
+        self.draw_player_field.clear_field()
+        self.draw_AI_field.clear_field()
+        for row in self.draw_double_AI_field.field:
+            for cell in row:
+                cell.visible = True
+        self.init_components_for_game()
 
     def end(self):
         self.is_game = False
+        self.reset_button.visible = True
+        self.reset_button.label.visible = True
+        self.back_button.visible = True
+        self.back_button.label.visible = True
+        if self.ai_win:
+            for row in self.draw_double_AI_field.field:
+                for cell in row:
+                    cell.visible = False
 
     def process_logic(self, dt):
         if self.is_game and self.turn == 'AI':
@@ -302,4 +396,61 @@ class GameScene:
             self.is_ai_win()
 
     def update(self, dt):
-        pass
+        for row in self.draw_double_AI_field.field:
+            for cell in row:
+                cell.update_animation(dt)
+        for row in self.draw_AI_field.field:
+            for cell in row:
+                cell.update_animation(dt)
+        for ship in self.player_ships.ships:
+            for deck in ship:
+                deck.update_animation(dt)
+        if self.start_button.visible == True:
+            self.start_button.update_animation(dt)
+        if self.reset_button.visible == True:
+            self.reset_button.update_animation(dt)
+        if self.back_button.visible == True:
+            self.back_button.update_animation(dt)
+        if self.clear_pl_field_button.visible == True:
+            self.clear_pl_field_button.update_animation(dt)
+    def on_mouse_motion(self, x, y, dx, dy):
+        for row in self.draw_double_AI_field.field:
+            for cell in row:
+                if cell.mouse_on(x, y):
+                    cell.target_scale = 1.15
+                else:
+                    cell.target_scale = 1.0
+        for row in self.draw_AI_field.field:
+            for cell in row:
+                if cell.mouse_on(x, y):
+                    cell.target_scale = 1.15
+                else:
+                    cell.target_scale = 1.0
+        for ship in self.player_ships.ships:
+            check = any(deck.mouse_on(x, y) for deck in ship)
+            if check:
+                for d in ship:
+                    d.target_scale = 1.02
+            else:
+                for d in ship:
+                    d.target_scale = 1.0
+        if self.start_button.visible == True:
+            if self.start_button.mouse_on(x, y):
+                self.start_button.target_scale = 1.05
+            else:
+                self.start_button.target_scale = 1.0
+        if self.reset_button.visible == True:
+            if self.reset_button.mouse_on(x, y):
+                self.reset_button.target_scale = 1.05
+            else:
+                self.reset_button.target_scale = 1.0
+        if self.back_button.visible == True:
+            if self.back_button.mouse_on(x, y):
+                self.back_button.target_scale = 1.05
+            else:
+                self.back_button.target_scale = 1.0
+        if self.clear_pl_field_button.visible == True:
+            if self.clear_pl_field_button.mouse_on(x, y):
+                self.clear_pl_field_button.target_scale = 1.05
+            else:
+                self.clear_pl_field_button.target_scale = 1.0

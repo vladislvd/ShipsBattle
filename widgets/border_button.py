@@ -1,9 +1,9 @@
 import pyglet
 
 
-class Button(pyglet.shapes.Rectangle):
-    def __init__(self, x, y, width, height, color, text, batch):
-        super().__init__(x=x, y=y, width=width, height=height, color=color, batch=batch)
+class Border_Button(pyglet.shapes.BorderedRectangle):
+    def __init__(self, x, y, width, height, border, color, border_color, text, batch):
+        super().__init__(x=x, y=y, width=width, height=height, border=border, color=color, border_color=border_color, batch=batch)
         self.anchor_x = width // 2
         self.anchor_y = height // 2
         self.scale = 1.0
@@ -17,9 +17,9 @@ class Button(pyglet.shapes.Rectangle):
             anchor_x="center",
             anchor_y="center",
             font_name="Agency FB",
-            color=(0, 0, 0),
+            color=(255, 255, 255),
             batch=batch,
-            font_size=30,
+            font_size=20,
         )
 
     def mouse_on(self, x, y):
