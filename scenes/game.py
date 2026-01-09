@@ -237,7 +237,7 @@ class GameScene:
             self.is_placing = False
         if self.back_button.visible == True and self.back_button.mouse_on(x, y):
             self.back_button.target_scale = 1.0
-            application.switch_scene('menu')
+            self.application.switch_scene('menu')
         if self.reset_button.visible == True and self.reset_button.mouse_on(x, y):
             self.reset_button.target_scale = 1.0
             self.reset()
@@ -344,6 +344,7 @@ class GameScene:
                 ai_killed_ships += 1
         if ai_killed_ships == len(self.AI_ships.ships):
             self.end_text.text = "PLAYER WIN"
+            self.end_text.visible = True
             self.pl_win = True
             self.end()
 
@@ -354,6 +355,7 @@ class GameScene:
                 pl_killed_ships += 1
         if pl_killed_ships == len(self.player_ships.ships):
             self.end_text.text = "AI WIN"
+            self.end_text.visible = True
             self.ai_win = True
             self.end()
 
@@ -419,6 +421,7 @@ class GameScene:
             self.back_button.update_animation(dt)
         if self.clear_pl_field_button.visible == True:
             self.clear_pl_field_button.update_animation(dt)
+
     def on_mouse_motion(self, x, y, dx, dy):
         for row in self.draw_double_AI_field.field:
             for cell in row:
