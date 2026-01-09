@@ -102,31 +102,28 @@ class GameScene:
 
     def confirm_player_ships(self):
         ships = self.player_ships.ships
-        for ship_ind in range(len(ships)):
-            fl = False
-            ship = ships[ship_ind]
-            pos = self.mouse_to_field(ship[0].x, ship[0].y, self.draw_player_field)
-            if not pos:
-                for ship in ships:
-                    for deck in ship:
-                        if deck.error == True:
-                            deck.set_type(4)
-                            fl = True
+        fl = False
+        for ship in ships:
+            for deck in ship:
+                if not deck.on_field:
+                    deck.set_type(4)
+                    fl = True
+        if fl:
+            return False
+        for ship in ships:
+            rotate = ship[0].rotate
+            x_on_field, y_on_field = self.mouse_to_field(ship[0].x, ship[0].y, self.draw_player_field)
+            if not self.player_ships.check_around(len(ship), x_on_field, y_on_field, rotate, 10, self.draw_player_field.field, True):
+                for deck in ship:
+                    deck.set_type(4)
+                    deck.error = True
+                    deck.on_field = True
+                    fl = True
             else:
-                for ship in ships:
-                    rotate = ship[0].rotate
-                    x_on_field, y_on_field = self.mouse_to_field(ship[0].x, ship[0].y, self.draw_player_field)
-                    if not self.player_ships.check_around(len(ship), x_on_field, y_on_field, rotate, 10, self.draw_player_field.field, True):
-                        for deck in ship:
-                            deck.set_type(4)
-                            deck.error = True
-                            deck.on_field = True
-                            fl = True
-                    else:
-                        for deck in ship:
-                            deck.set_type(1)
-                            deck.error = False
-                            deck.on_field = True
+                for deck in ship:
+                    deck.set_type(1)
+                    deck.error = False
+                    deck.on_field = True
         if fl:
             return False
         for ship_ind in range(len(ships)):
@@ -166,9 +163,17 @@ class GameScene:
             for deck in self.dragged_object:
                 deck.error = False
                 deck.set_type(1)
-                right_side = x + len(self.dragged_object) * config.CELL_SIZE + config.BORDER_SIZE*2
-                if right_side < self.start_button.x or x > self.start_button.x + self.start_button.width or \
-                    y + config.CELL_SIZE < self.start_button.y or y > self.start_button.y + self.start_button.height:
+                if rotate == 'x':
+                    right_side = x + len(self.dragged_object) * config.CELL_SIZE + config.BORDER_SIZE * (len(self.dragged_object) - 0.5)
+                    but_check = right_side < self.start_button.x or x > self.start_button.x + self.start_button.width or \
+                        y + config.CELL_SIZE < self.start_button.y or y > self.start_button.y + self.start_button.height
+                    window_check = right_side < config.WINDOW_WIDTH and x > 0 and y + config.CELL_SIZE < config.WINDOW_HEIGHT and y > 0
+                else:
+                    up_side = y + len(self.dragged_object) * config.CELL_SIZE + config.BORDER_SIZE * (len(self.dragged_object) - 0.5)
+                    but_check = x + config.CELL_SIZE < self.start_button.x or x > self.start_button.x + self.start_button.width or \
+                        up_side < self.start_button.y or y > self.start_button.y + self.start_button.height
+                    window_check = x + config.CELL_SIZE < config.WINDOW_WIDTH and x > 0 and up_side < config.WINDOW_HEIGHT and y > 0
+                if but_check and window_check:
                     deck.x = (i if rotate == 'x' else x)
                     deck.y = (i if rotate == 'y' else y)
                     i += (config.CELL_SIZE + config.BORDER_SIZE)
@@ -191,8 +196,10 @@ class GameScene:
                 cy = y_on_field + (i if rotate == 'y' else 0)
                 if cx >= 10 or cy >= 10 or self.draw_player_field.field[cy][cx].type == 1:
                     for deck in self.dragged_object:
+                        deck.on_field = (False if cx >= 10 or cy >= 10 else True)
                         deck.error = True
                         deck.set_type(4)
+                    self.dragged_object = None
                     return False
             for i, deck in enumerate(self.dragged_object):
                 rotate = deck.rotate
