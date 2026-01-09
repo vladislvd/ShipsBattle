@@ -181,7 +181,7 @@ class GameScene:
                 rotate = deck.rotate
                 cx = x_on_field + (i if rotate == 'x' else 0)
                 cy = y_on_field + (i if rotate == 'y' else 0)
-                if self.draw_player_field.field[cy][cx].type == 1:
+                if cx >= 10 or cy >= 10 or self.draw_player_field.field[cy][cx].type == 1:
                     for deck in self.dragged_object:
                         deck.error = True
                         deck.set_type(4)
