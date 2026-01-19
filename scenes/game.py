@@ -241,6 +241,8 @@ class GameScene:
                 return False
             self.start_button.label.visible = False
             self.start_button.visible = False
+            self.clear_pl_field_button.visible = False
+            self.clear_pl_field_button.label.visible = False
             self.is_game = True
             self.is_placing = False
         if self.back_button.visible == True and self.back_button.mouse_on(x, y):
@@ -249,7 +251,7 @@ class GameScene:
         if self.reset_button.visible == True and self.reset_button.mouse_on(x, y):
             self.reset_button.target_scale = 1.0
             self.reset()
-        if self.clear_pl_field_button.visible == True and self.clear_pl_field_button.mouse_on(x, y):
+        if self.clear_pl_field_button.visible == True and self.is_placing == True and self.clear_pl_field_button.mouse_on(x, y):
             self.clear_pl_field_button.target_scale = 1.0
             self.player_ships.delete_ships()
             self.init_player_ships()
@@ -381,6 +383,8 @@ class GameScene:
         self.back_button.visible = False
         self.back_button.label.visible = False
         self.end_text.visible = False
+        self.clear_pl_field_button.visible = True
+        self.clear_pl_field_button.label.visible = True
         self.draw_player_field.clear_field()
         self.draw_AI_field.clear_field()
         self.move_arrow.update_x(self.draw_AI_field.field[9][5].x - config.ANCHOR - config.BORDER_SIZE//2)
