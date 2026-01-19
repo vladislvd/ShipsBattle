@@ -59,6 +59,14 @@ class GameScene:
                                                            text="Clear",
                                                            batch=self.batch
                                                            )
+        self.rotate_text = pyglet.text.Label(
+            text="[R] - Rotate",
+            color = (255, 255, 255),
+            x = 10,
+            y = 10,
+            font_size = 20,
+            font_name="Agency FB",
+            batch=self.batch)
         self.end_text = pyglet.text.Label(
             text='PLAYER WIN',
             color=config.END_TEXT,
